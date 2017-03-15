@@ -691,6 +691,7 @@ class GuildWars2:
         if on_off is not None:
             self.settings["ENABLED"] = on_off
         if self.settings["ENABLED"]:
+			await self.update_build
             await self.bot.say("Build checking is enabled. "
                                "You still need to enable it per server.")
         else:
