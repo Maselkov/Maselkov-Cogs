@@ -204,7 +204,7 @@ class GuildWars2:
 
     @commands.command(pass_context=True)
     async def li(self, ctx):
-        """Shows how many Legendar Insights you have
+        """Shows how many Legendary Insights you have
 
         Requires a key with inventories and characters scope
         """
@@ -216,8 +216,10 @@ class GuildWars2:
             key = self.keylist[user.id]["key"]
             endpoint = "account/bank?access_token={0}".format(key)
             endpoint_ = "characters?access_token={0}".format(key)
+            endpoint__ = "account/inventory?access_token={0}".format(key)
             results = await self.call_api(endpoint)
             characters = await self.call_api(endpoint_)
+            shared = await self.call_api(endpoint__)
         except APIKeyError as e:
             await self.bot.say(e)
             return
@@ -227,7 +229,11 @@ class GuildWars2:
             return
         li = 0
         results = [e for e in results if e != None]
+        shared = [e for e in shared if e != None]
         for x in results:
+            if x["id"] == 77302:
+                li += x["count"]
+        for x in shared:
             if x["id"] == 77302:
                 li += x["count"]
         for character in characters:
