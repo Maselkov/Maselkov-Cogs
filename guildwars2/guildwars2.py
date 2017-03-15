@@ -69,8 +69,11 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
+        name = results["name"]
+        if not name:
+            name = None #Else embed fails
         self.keylist[user.id] = {
-            "key": key, "account_name": acc["name"], "name": results["name"], "permissions": results["permissions"]}
+            "key": key, "account_name": acc["name"], "name": name, "permissions": results["permissions"]}
         await self.bot.say("{0.mention}, your api key was verified and "
                            "added to the list. Your message was removed "
                            "for privacy.".format(user))
