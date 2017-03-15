@@ -12,10 +12,10 @@ import aiohttp
 import datetime
 
 try:
-	from bs4 import BeautifulSoup
-	soupAvailable = True
+    from bs4 import BeautifulSoup
+    soupAvailable = True
 except:
-	soupAvailable = False
+    soupAvailable = False
 
 
 class APIError(Exception):
@@ -36,10 +36,8 @@ class GuildWars2:
         self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
-
     def __unload(self):
         self.session.close()
-
 
     @commands.group(pass_context=True)
     async def key(self, ctx):
@@ -72,7 +70,7 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
         self.keylist[user.id] = {
-            "key": key, "account_name": acc["name"], "name" : results["name"], "permissions": results["permissions"]}
+            "key": key, "account_name": acc["name"], "name": results["name"], "permissions": results["permissions"]}
         await self.bot.say("{0.mention}, your api key was verified and "
                            "added to the list. Your message was removed "
                            "for privacy.".format(user))
@@ -176,7 +174,8 @@ class GuildWars2:
             hascommander = "No"
         data = discord.Embed(description=None, colour=user.colour)
         data.add_field(name="Created account on", value=created)
-        data.add_field(name="Has commander tag", value=hascommander, inline=False)
+        data.add_field(name="Has commander tag",
+                       value=hascommander, inline=False)
         if "fractal_level" in results:
             fractallevel = results["fractal_level"]
             data.add_field(name="Fractal level", value=fractallevel)
@@ -338,8 +337,6 @@ class GuildWars2:
         output += "```"
         await self.bot.say(output.format(user))
 
-
-
     @character.command(pass_context=True)
     async def gear(self, ctx, *, character: str):
         """Displays the gear of given character
@@ -415,7 +412,6 @@ class GuildWars2:
             await self.bot.say(embed=data)
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
-
 
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
@@ -612,31 +608,32 @@ class GuildWars2:
         wiki = "http://wiki.guildwars2.com/"
         search = search.replace(" ", "+")
         user = ctx.message.author
-        url = wiki + "index.php?title=Special%3ASearch&profile=default&fulltext=Search&search={0}".format(search)
+        url = wiki + \
+            "index.php?title=Special%3ASearch&profile=default&fulltext=Search&search={0}".format(
+                search)
         async with self.session.get(url) as r:
             results = await r.text()
             soup = BeautifulSoup(results, 'html.parser')
         try:
-            div = soup.find("div", {"class" : "mw-search-result-heading"})
+            div = soup.find("div", {"class": "mw-search-result-heading"})
             a = div.find('a')
             link = a['href']
             await self.bot.say("{0.mention}: {1}{2}".format(user, wiki, link))
         except:
             await self.bot.say("{0.mention}, no results found".format(user))
 
-
     @commands.group(pass_context=True, no_pm=True)
     @checks.admin_or_permissions(manage_server=True)
     async def gamebuild(self, ctx):
         """Commands related to setting up a new game build notifier
 
-		Setting up:
+        Setting up:
 
-		Make sure build checking is globally enabled ([p]gamebuild globaltoggle)
-		Set an announcement channel using [p]gamebuild channel
-		Enable it using [p]gamebuild toggle on
-		That's it!
-		"""
+        Make sure build checking is globally enabled ([p]gamebuild globaltoggle)
+        Set an announcement channel using [p]gamebuild channel
+        Enable it using [p]gamebuild toggle on
+        That's it!
+        """
         server = ctx.message.server
         if server.id not in self.settings:
             self.settings[server.id] = {"ON": False, "CHANNEL": None}
@@ -691,13 +688,12 @@ class GuildWars2:
         if on_off is not None:
             self.settings["ENABLED"] = on_off
         if self.settings["ENABLED"]:
-			await self.update_build
+            await self.update_build
             await self.bot.say("Build checking is enabled. "
                                "You still need to enable it per server.")
         else:
             await self.bot.say("Build checking is globally disabled")
         dataIO.save_json('data/guildwars2/settings.json', self.settings)
-
 
     async def _gamebuild_checker(self):
         while self is self.bot.get_cog("GuildWars2"):
@@ -817,7 +813,8 @@ class GuildWars2:
 
     def _check_scopes_(self, user, scopes):
         if user.id not in self.keylist:
-            raise APIKeyError("No API key associated with {0.mention}".format(user))
+            raise APIKeyError(
+                "No API key associated with {0.mention}".format(user))
         if scopes:
             missing = []
             for scope in scopes:
@@ -825,7 +822,8 @@ class GuildWars2:
                     missing.append(scope)
             if missing:
                 missing = ", ".join(missing)
-                raise APIKeyError("{0.mention}, missing the following scopes to use this command: `{1}`".format(user, missing))
+                raise APIKeyError(
+                    "{0.mention}, missing the following scopes to use this command: `{1}`".format(user, missing))
 
     def save_keys(self):
         dataIO.save_json('data/guildwars2/keys.json', self.keylist)
