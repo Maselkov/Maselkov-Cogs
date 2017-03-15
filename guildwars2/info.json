@@ -1,0 +1,9 @@
+{
+    "AUTHOR" : "Maselkov",
+    "SHORT" : "Commands using the GW2 API",
+    "DESCRIPTION" : "Commands using the GW2 API",
+    "DISABLED" : false,
+    "NAME" : "GuildWars2",
+    "TAGS" : ["guildwars2", "games"],
+    "INSTALL_MSG" : "Thanks for installing this cog. Use !key add to add your api key. You can set up new game build notifier using `[p]gamebuild.`. See [p]help gamebuild"
+}

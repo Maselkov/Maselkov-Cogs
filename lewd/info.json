@@ -1,0 +1,9 @@
+{
+    "AUTHOR" : "Maselkov",
+    "SHORT" : "Search NSFW sites",
+    "DESCRIPTION" : "Search e621.net and rule34.xxx",
+    "DISABLED" : false,
+    "NAME" : "Lewd",
+    "TAGS" : ["NSFW", "e621", "rule34"],
+    "INSTALL_MSG" : "See [p]help if you need help. There's not much to it"
+}
