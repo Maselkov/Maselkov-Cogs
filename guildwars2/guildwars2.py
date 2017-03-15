@@ -625,15 +625,7 @@ class GuildWars2:
     @commands.group(pass_context=True, no_pm=True)
     @checks.admin_or_permissions(manage_server=True)
     async def gamebuild(self, ctx):
-        """Commands related to setting up a new game build notifier
-
-        Setting up:
-
-        Make sure build checking is globally enabled ([p]gamebuild globaltoggle)
-        Set an announcement channel using [p]gamebuild channel
-        Enable it using [p]gamebuild toggle on
-        That's it!
-        """
+        """Commands related to setting up a new game build notifier"""
         server = ctx.message.server
         if server.id not in self.settings:
             self.settings[server.id] = {"ON": False, "CHANNEL": None}
@@ -668,7 +660,10 @@ class GuildWars2:
         if on_off is not None:
             self.settings[server.id]["ON"] = on_off
         if self.settings[server.id]["ON"]:
-            await self.bot.say("I will notify you about new builds")
+            await self.bot.say("I will notify you on this server about new builds")
+            if not self.settings["ENABLED"]:
+                await self.bot.say("Build checking is globally disabled though. "
+                                   "Owner has to enable it using `[p]gamebuild globaltoggle on`")
         else:
             await self.bot.say("I will not send "
                                "notifications about new builds")
@@ -681,7 +676,7 @@ class GuildWars2:
 
         Note that in order to receive notifications you to
         set up notification channel and enable it per server using
-        !gamebuild toggle
+        [p]gamebuild toggle
 
         Off by default.
         """

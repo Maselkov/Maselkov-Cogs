@@ -5,5 +5,5 @@
     "DISABLED" : false,
     "NAME" : "GuildWars2",
     "TAGS" : ["guildwars2", "games"],
-    "INSTALL_MSG" : "Thanks for installing this cog. Use !key add to add your api key. You can set up new game build notifier using `[p]gamebuild.`. See `[p]help gamebuild`"
+    "INSTALL_MSG" : "Thanks for installing this cog. Use `[p]key add` add to add your api key. You can set up new game build notifier using `[p]gamebuild`. - first set a channel using `[p]gamebuild channel`, then toggle it using `[p]gamebuild toggle on`. Make sure `[p]gamebuild globaltoggle` is enabled as well!"
 }
