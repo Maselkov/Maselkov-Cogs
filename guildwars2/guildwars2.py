@@ -140,7 +140,8 @@ class GuildWars2:
         permissions = self.keylist[user.id]["permissions"]
         permissions = ', '.join(permissions)
         data = discord.Embed(description=None, colour=user.colour)
-        data.add_field(name="Key name", value=keyname)
+        if keyname:
+            data.add_field(name="Key name", value=keyname)
         data.add_field(name="Permissions", value=permissions)
         data.set_author(name=accountname)
         try:
