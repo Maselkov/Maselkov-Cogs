@@ -211,11 +211,11 @@ class GuildWars2:
         user = ctx.message.author
         scopes = ["inventories", "characters"]
         msg = await self.bot.say("Getting legendary insights, this might take a while...")
-        key = self.keylist[user.id]["key"]
-        endpoint = "account/bank?access_token={0}".format(key)
-        endpoint_ = "characters?access_token={0}".format(key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/bank?access_token={0}".format(key)
+            endpoint_ = "characters?access_token={0}".format(key)
             results = await self.call_api(endpoint)
             characters = await self.call_api(endpoint_)
         except APIKeyError as e:
@@ -268,7 +268,6 @@ class GuildWars2:
         scopes = ["characters"]
         user = ctx.message.author
         character = character.title()
-        accountname = self.keylist[user.id]["account_name"]
         character.replace(" ", "%20")
         try:
             self._check_scopes_(user, scopes)
@@ -282,6 +281,7 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
+        accountname = self.keylist[user.id]["account_name"]
         age = self.get_age(results["age"])
         created = results["created"].split("T", 1)[0]
         deaths = results["deaths"]
