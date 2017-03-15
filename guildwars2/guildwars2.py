@@ -123,10 +123,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = []
-        key = self.keylist[user.id]["key"]
-        endpoint = "account/?access_token={0}".format(key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -157,10 +157,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["account"]
-        key = self.keylist[user.id]["key"]
-        endpoint = "account/?access_token={0}".format(key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -269,11 +269,11 @@ class GuildWars2:
         user = ctx.message.author
         character = character.title()
         accountname = self.keylist[user.id]["account_name"]
-        key = self.keylist[user.id]["key"]
         character.replace(" ", "%20")
-        endpoint = "characters/{0}?access_token={1}".format(character, key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "characters/{0}?access_token={1}".format(character, key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -323,10 +323,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["characters"]
-        key = self.keylist[user.id]["key"]
-        endpoint = "characters/?access_token={0}".format(key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "characters/?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -352,11 +352,11 @@ class GuildWars2:
         user = ctx.message.author
         scopes = ["characters"]
         character = character.title()
-        key = self.keylist[user.id]["key"]
         character.replace(" ", "%20")
-        endpoint = "characters/{0}?access_token={1}".format(character, key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "characters/{0}?access_token={1}".format(character, key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -434,10 +434,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["pvp"]
-        key = self.keylist[user.id]["key"]
-        endpoint = "pvp/stats?access_token={0}".format(key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "pvp/stats?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -482,10 +482,10 @@ class GuildWars2:
         user = ctx.message.author
         professionsformat = {}
         scopes = ["pvp"]
-        key = self.keylist[user.id]["key"]
-        endpoint = "pvp/stats?access_token={0}".format(key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "pvp/stats?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -567,10 +567,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["progression"]
-        key = self.keylist[user.id]["key"]
-        endpoint = "account/raids/?access_token={0}".format(key)
         try:
             self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/raids/?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -832,7 +832,6 @@ def check_folders():
     if not os.path.exists("data/guildwars2"):
         print("Creating data/guildwars2")
         os.makedirs("data/guildwars2")
-# TODO THIS
 
 
 def check_files():
