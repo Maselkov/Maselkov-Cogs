@@ -632,6 +632,41 @@ class GuildWars2:
         except:
             await self.bot.say("{0.mention}, no results found".format(user))
 
+
+    @commands.command(pass_context=True)
+    async def daily(self, ctx, pve_pvp_wvw_fractals):
+        valid_dailies = ["pvp", "wvw", "pve", "fractals"]
+        search = pve_pvp_wvw_fractals.lower()
+        try:
+            endpoint = "achievements/daily"
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+        search = pve_pvp_wvw_fractals.lower()
+        if search in valid_dailies:
+            data = results[search]
+        else:
+            await self.bot.say("Invalid type of daily")
+            return
+        dailies = []
+        for x in data:
+            if x["level"]["max"] == 80:
+                dailies.append(str(x["id"]))
+        dailies = ",".join(dailies)
+        try:
+            endpoint = "achievements?ids={0}".format(dailies)
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+        output = "{0} dailes for today are: ```".format(search.capitalize())
+        for x in results:
+            output += "\n" + x["name"]
+        output += "```"
+        await self.bot.say(output)
+
+
     @commands.group(pass_context=True, no_pm=True)
     @checks.admin_or_permissions(manage_server=True)
     async def gamebuild(self, ctx):
