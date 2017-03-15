@@ -31,7 +31,7 @@ class Lewd:
         search = ""
         author = ctx.message.author
         server = ctx.message.server
-        msg = self.bot.say("Acquiring porn...")
+        msg = await self.bot.say("Acquiring porn...")
         if tags:
             search = " ".join(tags)
         else:
