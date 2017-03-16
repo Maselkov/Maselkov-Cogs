@@ -49,18 +49,24 @@ class GuildWars2:
     @key.command(pass_context=True)
     async def add(self, ctx, key):
         """Adds your key and associates it with your discord account"""
+        server = ctx.message.server
+        channel = ctx.message.channel
         user = ctx.message.author
-        await self.bot.delete_message(ctx.message)
+        has_permissions = channel.permissions_for(server.me).manage_messages
+        if has_permissions:
+            await self.bot.delete_message(ctx.message)
+            output = "Your message was removed for privacy"
+        else:
+            output = "I would've removed your message as well, but I don't have the neccesary permissions..."
         if user.id in self.keylist:
-            await self.bot.say("{0.mention}, You're already on the list, "
-                               "remove your key first if you wish to change it. Your "
-                               "message was removed for privacy".format(user))
+            await self.bot.say("{0.mention}, you're already on the list, "
+                               "remove your key first if you wish to change it. {1}".format(user, output))
             return
         endpoint = "tokeninfo?access_token={0}".format(key)
         try:
             results = await self.call_api(endpoint)
         except APIError as e:
-            await self.bot.say("{0.mention}, {1}. Your message was removed for privacy.".format(user, e))
+            await self.bot.say("{0.mention}, {1}. {2}".format(user, e, output))
             return
         endpoint = "account/?access_token={0}".format(key)
         try:
@@ -75,8 +81,7 @@ class GuildWars2:
         self.keylist[user.id] = {
             "key": key, "account_name": acc["name"], "name": name, "permissions": results["permissions"]}
         await self.bot.say("{0.mention}, your api key was verified and "
-                           "added to the list. Your message was removed "
-                           "for privacy.".format(user))
+                           "added to the list. {1}".format(user, output))
         self.save_keys()
 
     @key.command(pass_context=True)
