@@ -429,6 +429,79 @@ class GuildWars2:
             await self.bot.say("Need permission to embed links")
 
     @commands.group(pass_context=True)
+    async def wallet(self, ctx):
+        """Wallet related commands.
+
+        Require a key with the scope wallet
+        """
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+
+    @wallet.command(pass_context=True)
+    async def currencies(self, ctx):
+        """Returns a list of all currencies"""
+        user = ctx.message.author
+        try:
+            endpoint = "currencies?ids=all"
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        currlist = []
+        for currency in results:
+            currlist.append(currency["name"])
+        output = "Available currencies are: ```"
+        output += ", ".join(currlist) + "```"
+        await self.bot.say(output)
+
+    @wallet.command(pass_context=True)
+    async def currency(self, ctx, *, currency: str):
+        """Info about a currency. See [p]wallet currencies for list"""
+        user = ctx.message.author
+        try:
+            endpoint = "currencies?ids=all"
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        cid = None
+        for curr in results:
+            if curr["name"].lower() == currency.lower():
+                cid = curr["id"]
+                desc = curr["description"]
+                icon = curr["icon"]
+        if not cid:
+            await self.bot.say("Invalid currency. See `[p]wallet currencies`")
+            return
+        data = discord.Embed(description="Currency", colour=user.colour)
+        scopes = ["wallet"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/wallet?access_token={0}".format(key)
+            wallet = await self.call_api(endpoint)
+            for item in wallet:
+                if item["id"] == 1 and cid == 1:
+                    count = int(item["value"] / 10000) #TODO handling for coins
+                else:
+                    if item["id"] == cid:
+                        count = item["value"]
+            data.add_field(name="Count", value=count, inline=False)
+        except:
+            pass
+        data.set_thumbnail(url=icon)
+        data.add_field(name="Description", value=desc, inline=False)
+        data.set_author(name=currency.title())
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
+
+    @commands.group(pass_context=True)
     async def pvp(self, ctx):
         """PvP related commands.
 
@@ -439,7 +512,7 @@ class GuildWars2:
 
     @pvp.command(pass_context=True)
     async def stats(self, ctx):
-        """ssInformation about your general pvp stats
+        """Information about your general pvp stats
 
         Requires a key with pvp scope
         """
