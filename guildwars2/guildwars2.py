@@ -410,7 +410,7 @@ class GuildWars2:
                 if gear[piece]["infusions"]:
                     infusion = await self._get_item_name_(gear[piece]["infusions"])
                 if gear[piece]["upgrades"] and not gear[piece]["infusions"]:
-                    msg = "TEST1 {0} {1} with {2}".format(
+                    msg = "TEST1 {0} {1} with {2} {3}".format(
                         statname, itemname, upgrade, icon_url=iconurl)
                 elif gear[piece]["upgrades"] and gear[piece]["infusions"]:
                     msg = "TEST2 {0} {1} with {2} and {3}".format(
