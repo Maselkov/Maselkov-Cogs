@@ -818,6 +818,26 @@ class GuildWars2:
         name = results["details"]["infix_upgrade"]["id"]
         return name
 
+    async def _get_icon_url_(self, items):
+        iconurl = []
+        if isinstance(items, int):
+            endpoint = "items/{0}".format(items)
+            try:
+                results = await self.call_api(endpoint)
+            except APIError:
+                return None
+            name.append(results["icon"])
+        else:
+            for x in items:
+                endpoint = "items/{0}".format(x)
+                try:
+                    results = await self.call_api(endpoint)
+                except APIError:
+                    return None
+                iconurl.append(results["icon"])
+        iconurl = ", ".join(iconurl)
+        return iconurl
+
     async def _getstatname_(self, item):
         endpoint = "itemstats/{0}".format(item)
         try:
