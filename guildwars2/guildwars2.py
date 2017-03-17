@@ -520,26 +520,19 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        wallet = {"gold" : 0, "karma" : 0, "laurels" : 0, "gems" : 0, "fractal relics" : 0, "pristine fractal relics" : 0, "unbound magic" : 0}
-        for curr in results:
-            if curr["id"] == 1:
-                wallet["gold"] = int(curr["value"] / 10000)
-            elif curr["id"] == 2:
-                wallet["karma"] = curr["value"]
-            elif curr["id"] == 3:
-                wallet["laurels"] = curr["value"]
-            elif curr["id"] == 4:
-                wallet["gems"] = curr["value"]
-            elif curr["id"] == 7:
-                wallet["fractal relics"] = curr["value"]
-            elif curr["id"] == 24:
-                wallet["pristine fractal relics"] = curr["value"]
-            elif curr["id"] == 32:
-                wallet["unbound magic"] = curr["value"]
+        wallet = [{"count" : 0, "id" : 1, "name" : "gold"}, {"count" : 0, "id" : 2, "name" : "karma"}, {"count" : 0, "id" : 3, "name" : "laurels"},
+                  {"count" : 0, "id" : 4, "name" : "gems"}, {"count" : 0, "id" : 7, "name" : "fractal relics"},
+                  {"count" : 0, "id" : 24, "name" : "pristine fractal relics"}, {"count" : 0, "id" : 32, "name" : "unbound magic"}]
+        for x in wallet:
+            for curr in results:
+                if curr["id"] == x["id"]:
+                    x["count"] = curr["value"]
         accountname = self.keylist[user.id]["account_name"]
         data = discord.Embed(description="Wallet", colour=user.colour)
-        for key, value in wallet.items():
-            data.add_field(name=key.title(), value=value)
+        for x in wallet:
+            if x["name"] == "gold":
+                x["count"] = int(x["count"] / 10000)
+            data.add_field(name=x["name"].title(), value=x["count"])
         #data.set_thumbnail(url=icon)
         data.set_author(name=accountname)
         try:
@@ -547,7 +540,51 @@ class GuildWars2:
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
+    @wallet.command(pass_context=True)
+    async def dungeons(self, ctx):
+        """Shows dungeon currencies
 
+        Requires key with scope wallet
+        """
+        user = ctx.message.author
+        scopes = ["wallet"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/wallet?access_token={0}".format(key)
+            results = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        wallet = [{"count" : 0, "id" : 5, "name" : "Ascalonian Tear"},
+                  {"count" : 0, "id" : 6, "name" : "Shard of Zhaitan"},
+                  {"count" : 0, "id" : 9, "name" : "Seal of Beetletun"},
+                  {"count" : 0, "id" : 10, "name" : "Manifesto of the Moletariate"},
+                  {"count" : 0, "id" : 11, "name" : "Deadly Bloom"},
+                  {"count" : 0, "id" : 12, "name" : "Symbol of Koda"},
+                  {"count" : 0, "id" : 13, "name" : "Flame Legion Charr Carving"},
+                  {"count" : 0, "id" : 14, "name" : "Knowledge Crystal"}]
+        for x in wallet:
+            for curr in results:
+                if curr["id"] == x["id"]:
+                    x["count"] = curr["value"]
+        accountname = self.keylist[user.id]["account_name"]
+        accountname = self.keylist[user.id]["account_name"]
+        data = discord.Embed(description="Dungeon tokens", colour=user.colour)
+        for x in wallet:
+            if x["name"] == "gold":
+                x["count"] = int(x["count"] / 10000)
+            data.add_field(name=x["name"].title(), value=x["count"])
+        # data.set_thumbnail(url=icon)
+        data.set_author(name=accountname)
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
 
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
