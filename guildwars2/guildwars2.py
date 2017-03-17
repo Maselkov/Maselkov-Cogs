@@ -500,6 +500,54 @@ class GuildWars2:
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
+    @wallet.command(pass_context=True)
+    async def show(self, ctx):
+        """Shows most important currencies in your wallet
+
+        Requires key with scope wallet
+        """
+        user = ctx.message.author
+        scopes = ["wallet"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/wallet?access_token={0}".format(key)
+            results = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        wallet = {"gold" : 0, "karma" : 0, "laurels" : 0, "gems" : 0, "fractal relics" : 0, "pristine fractal relics" : 0, "unbound magic" : 0}
+        for curr in results:
+            if curr["id"] == 1:
+                wallet["gold"] = int(curr["value"] / 10000)
+            elif curr["id"] == 2:
+                wallet["karma"] = curr["value"]
+            elif curr["id"] == 3:
+                wallet["laurels"] = curr["value"]
+            elif curr["id"] == 4:
+                wallet["gems"] = curr["value"]
+            elif curr["id"] == 7:
+                wallet["fractal relics"] = curr["value"]
+            elif curr["id"] == 24:
+                wallet["pristine fractal relics"] = curr["value"]
+            elif curr["id"] == 32:
+                wallet["unbound magic"] = curr["value"]
+        accountname = self.keylist[user.id]["account_name"]
+        data = discord.Embed(description="Wallet", colour=user.colour)
+        for key, value in wallet.items():
+            data.add_field(name=key.title(), value=value)
+        #data.set_thumbnail(url=icon)
+        data.set_author(name=accountname)
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
+
 
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
