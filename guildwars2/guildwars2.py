@@ -410,17 +410,18 @@ class GuildWars2:
                 if gear[piece]["infusions"]:
                     infusion = await self._get_item_name_(gear[piece]["infusions"])
                 if gear[piece]["upgrades"] and not gear[piece]["infusions"]:
-                    msg = "TEST1 {0} {1} with {2} {3}".format(
+                    msg = "TEST1 {0} {1} with {2}".format(
                         statname, itemname, upgrade, icon_url=iconurl)
                 elif gear[piece]["upgrades"] and gear[piece]["infusions"]:
                     msg = "TEST2 {0} {1} with {2} and {3}".format(
                         statname, itemname, upgrade, infusion, icon_url=iconurl)
                 elif gear[piece]["infusions"] and not gear[piece]["upgrades"]:
                     msg = "TEST3 {0} {1} with {2}".format(
-                        statname, itemname, infusion, icon_url=iconurl)
+                        statname, itemname, infusion)
                 elif not gear[piece]["upgrades"] and not gear[piece]["infusions"]:
                     msg = "Test4 {0} {1}".format(statname, itemname, icon_url=iconurl)
                 data.add_field(name=piece, value=msg, inline=False)
+                data.set_1mage(iconurl)
         data.set_author(name=character)
         data.set_footer(text="TEST A level {0} {1} ".format(
             level, profession.lower()), icon_url=icon)
