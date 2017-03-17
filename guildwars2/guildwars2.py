@@ -406,23 +406,21 @@ class GuildWars2:
                 itemname = await self._get_item_name_(gear[piece]["id"])
                 iconurl = await self._get_icon_url_(gear[piece]["id"])
 
-                create_custom_emoji(server(server.name),name("temp"),image(iconurl))
-
                 if gear[piece]["upgrades"]:
                     upgrade = await self._get_item_name_(gear[piece]["upgrades"])
                 if gear[piece]["infusions"]:
                     infusion = await self._get_item_name_(gear[piece]["infusions"])
                 if gear[piece]["upgrades"] and not gear[piece]["infusions"]:
-                    msg = "TEST1 {0} {1} with {2}".format(
+                    msg = "{0} {1} with {2}".format(
                         statname, itemname, upgrade)
                 elif gear[piece]["upgrades"] and gear[piece]["infusions"]:
-                    msg = "TEST2 {0} {1} with {2} and {3}".format(
+                    msg = "{0} {1} with {2} and {3}".format(
                         statname, itemname, upgrade, infusion)
                 elif gear[piece]["infusions"] and not gear[piece]["upgrades"]:
-                    msg = "TEST3 {0} {1} with {2}".format(
+                    msg = "{0} {1} with {2}".format(
                         statname, itemname, infusion)
                 elif not gear[piece]["upgrades"] and not gear[piece]["infusions"]:
-                    msg = "Test4 {0} {1}".format(statname, itemname)
+                    msg = "{0} {1}".format(statname, itemname)
                 data.add_field(name=piece, value=iconurl + " " + msg, inline=False)
         data.set_author(name=character)
         data.set_footer(text="A level {0} {1} ".format(
