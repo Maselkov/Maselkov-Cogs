@@ -396,7 +396,7 @@ class GuildWars2:
                         gear[piece]["statname"] = await self._getstats_(gear[piece]["id"])
         profession = results["profession"]
         level = results["level"]
-	icon = self.gamedata["professions"][profession.lower()]["icon"]
+        icon = self.gamedata["professions"][profession.lower()]["icon"]
         color = self.gamedata["professions"][profession.lower()]["color"]
         color = int(color, 0)
         data = discord.Embed(description="Gear", colour=color)
