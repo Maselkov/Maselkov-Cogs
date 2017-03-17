@@ -405,6 +405,9 @@ class GuildWars2:
                 statname = await self._getstatname_(gear[piece]["statname"])
                 itemname = await self._get_item_name_(gear[piece]["id"])
                 iconurl = await self._get_icon_url_(gear[piece]["id"])
+
+                create_custom_emoji(server(server.name),name("temp"),image(iconurl))
+
                 if gear[piece]["upgrades"]:
                     upgrade = await self._get_item_name_(gear[piece]["upgrades"])
                 if gear[piece]["infusions"]:
