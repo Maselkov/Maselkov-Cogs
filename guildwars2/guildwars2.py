@@ -422,8 +422,8 @@ class GuildWars2:
                     msg = "{0} {1}".format(statname, itemname)
                 data.add_field(name=piece, value=msg, inline=False)
         data.set_author(name=character)
-        data.set_footer(text="TEST A level {0} {1} {2} ".format(
-            level, profession.lower()),iconurl, icon_url=icon)
+        data.set_footer(text="TEST A level {0} {1} ".format(
+            level, profession.lower()), icon_url=iconurl)
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
