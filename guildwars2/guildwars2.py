@@ -467,6 +467,8 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
+        if currency.lower() == "gold":
+            currency = "coin"
         cid = None
         for curr in results:
             if curr["name"].lower() == currency.lower():
@@ -485,7 +487,7 @@ class GuildWars2:
             wallet = await self.call_api(endpoint)
             for item in wallet:
                 if item["id"] == 1 and cid == 1:
-                    count = int(item["value"] / 10000) #TODO handling for coins
+                    count = self.gold_to_coins(item["value"])
                 else:
                     if item["id"] == cid:
                         count = item["value"]
@@ -520,9 +522,15 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        wallet = [{"count" : 0, "id" : 1, "name" : "gold"}, {"count" : 0, "id" : 2, "name" : "karma"}, {"count" : 0, "id" : 3, "name" : "laurels"},
-                  {"count" : 0, "id" : 4, "name" : "gems"}, {"count" : 0, "id" : 7, "name" : "fractal relics"},
-                  {"count" : 0, "id" : 24, "name" : "pristine fractal relics"}, {"count" : 0, "id" : 32, "name" : "unbound magic"}]
+        wallet = [{"count" : 0, "id" : 1, "name" : "Gold"},
+                  {"count" : 0, "id" : 4, "name" : "Gems"},
+                  {"count" : 0, "id" : 2, "name" : "Karma"},
+                  {"count" : 0, "id" : 3, "name" : "Laurels"},
+                  {"count" : 0, "id" : 18, "name" : "Transmutation Charges"},
+                  {"count" : 0, "id" : 23, "name" : "Spirit Shards"},
+                  {"count" : 0, "id" : 32, "name" : "Unbound Magic"},
+                  {"count" : 0, "id" : 15, "name" : "Badges of Honor"},
+                  {"count" : 0, "id" : 16, "name" : "Guild Commendations"}]
         for x in wallet:
             for curr in results:
                 if curr["id"] == x["id"]:
@@ -530,10 +538,13 @@ class GuildWars2:
         accountname = self.keylist[user.id]["account_name"]
         data = discord.Embed(description="Wallet", colour=user.colour)
         for x in wallet:
-            if x["name"] == "gold":
-                x["count"] = int(x["count"] / 10000)
-            data.add_field(name=x["name"].title(), value=x["count"])
-        #data.set_thumbnail(url=icon)
+            if x["name"] == "Gold":
+                x["count"] = self.gold_to_coins(x["count"])
+                data.add_field(name=x["name"], value=x["count"], inline=False)
+            elif x["name"] == "Gems":
+                data.add_field(name=x["name"], value=x["count"], inline=False)
+            else:
+                data.add_field(name=x["name"], value=x["count"])
         data.set_author(name=accountname)
         try:
             await self.bot.say(embed=data)
@@ -541,8 +552,8 @@ class GuildWars2:
             await self.bot.say("Need permission to embed links")
 
     @wallet.command(pass_context=True)
-    async def dungeons(self, ctx):
-        """Shows dungeon currencies
+    async def tokens(self, ctx):
+        """Shows instance-specific currencies
 
         Requires key with scope wallet
         """
@@ -560,31 +571,76 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        wallet = [{"count" : 0, "id" : 5, "name" : "Ascalonian Tear"},
-                  {"count" : 0, "id" : 6, "name" : "Shard of Zhaitan"},
-                  {"count" : 0, "id" : 9, "name" : "Seal of Beetletun"},
-                  {"count" : 0, "id" : 10, "name" : "Manifesto of the Moletariate"},
-                  {"count" : 0, "id" : 11, "name" : "Deadly Bloom"},
-                  {"count" : 0, "id" : 12, "name" : "Symbol of Koda"},
-                  {"count" : 0, "id" : 13, "name" : "Flame Legion Charr Carving"},
-                  {"count" : 0, "id" : 14, "name" : "Knowledge Crystal"}]
+        wallet = [{"count" : 0, "id" : 5, "name" : "Ascalonian Tears"},
+                  {"count" : 0, "id" : 6, "name" : "Shards of Zhaitan"},
+                  {"count" : 0, "id" : 9, "name" : "Seals of Beetletun"},
+                  {"count" : 0, "id" : 10, "name" : "Manifestos of the Moletariate"},
+                  {"count" : 0, "id" : 11, "name" : "Deadly Blooms"},
+                  {"count" : 0, "id" : 12, "name" : "Symbols of Koda"},
+                  {"count" : 0, "id" : 13, "name" : "Flame Legion Charr Carvings"},
+                  {"count" : 0, "id" : 14, "name" : "Knowledge Crystals"},
+                  {"count" : 0, "id" : 7, "name" : "Fractal relics"},
+                  {"count" : 0, "id" : 24, "name" : "Pristine Fractal Relics"},
+                  {"count" : 0, "id" : 28, "name" : "Magnetite Shards"}]
         for x in wallet:
             for curr in results:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
         accountname = self.keylist[user.id]["account_name"]
         accountname = self.keylist[user.id]["account_name"]
-        data = discord.Embed(description="Dungeon tokens", colour=user.colour)
+        data = discord.Embed(description="Tokens", colour=user.colour)
         for x in wallet:
-            if x["name"] == "gold":
-                x["count"] = int(x["count"] / 10000)
-            data.add_field(name=x["name"].title(), value=x["count"])
-        # data.set_thumbnail(url=icon)
+            if x["name"] == "Magnetite Shards":
+                data.add_field(name=x["name"], value=x["count"], inline=False)
+            else:
+                data.add_field(name=x["name"], value=x["count"])
         data.set_author(name=accountname)
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
+
+    @wallet.command(pass_context=True)
+    async def maps(self, ctx):
+        """Shows map-specific currencies
+
+        Requires key with scope wallet
+        """
+        user = ctx.message.author
+        scopes = ["wallet"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/wallet?access_token={0}".format(key)
+            results = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        wallet = [{"count" : 0, "id" : 25, "name" : "Geodes"},
+                  {"count" : 0, "id" : 27, "name" : "Bandit Crests"},
+                  {"count" : 0, "id" : 19, "name" : "Airship Parts"},
+                  {"count" : 0, "id" : 22, "name" : "Lumps of Aurillium"},
+                  {"count" : 0, "id" : 20, "name" : "Ley Line Crystals"},
+                  {"count" : 0, "id" : 32, "name" : "Unbound Magic"}]
+        for x in wallet:
+            for curr in results:
+                if curr["id"] == x["id"]:
+                    x["count"] = curr["value"]
+        accountname = self.keylist[user.id]["account_name"]
+        accountname = self.keylist[user.id]["account_name"]
+        data = discord.Embed(description="Tokens", colour=user.colour)
+        for x in wallet:
+            data.add_field(name=x["name"], value=x["count"])
+        data.set_author(name=accountname)
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
 
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
@@ -908,6 +964,11 @@ class GuildWars2:
                                                     "@here Guild Wars 2 has just updated! New build: "
                                                     "`{0}`".format(self.gamedata["id"]))
             await asyncio.sleep(60)
+
+    def gold_to_coins(self, money):
+        gold, remainder = divmod(money, 10000)
+        silver, copper = divmod(remainder, 100)
+        return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
 
     async def _get_guild_(self, gid):
         endpoint = "guild/{0}".format(gid)
