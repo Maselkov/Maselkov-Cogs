@@ -421,7 +421,7 @@ class GuildWars2:
                 elif not gear[piece]["upgrades"] and not gear[piece]["infusions"]:
                     msg = "Test4 {0} {1}".format(statname, itemname, icon_url=iconurl)
                 data.add_field(name=piece, value=msg, inline=False)
-                data.set_1mage(iconurl)
+                data.set_image(iconurl)
         data.set_author(name=character)
         data.set_footer(text="TEST A level {0} {1} ".format(
             level, profession.lower()), icon_url=icon)
