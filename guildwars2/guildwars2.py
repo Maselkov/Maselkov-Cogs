@@ -405,7 +405,6 @@ class GuildWars2:
                 statname = await self._getstatname_(gear[piece]["statname"])
                 itemname = await self._get_item_name_(gear[piece]["id"])
                 iconurl = await self._get_icon_url_(gear[piece]["id"])
-                data.set_thumbnail(url=iconurl)
                 if gear[piece]["upgrades"]:
                     upgrade = await self._get_item_name_(gear[piece]["upgrades"])
                 if gear[piece]["infusions"]:
@@ -421,8 +420,7 @@ class GuildWars2:
                         statname, itemname, infusion)
                 elif not gear[piece]["upgrades"] and not gear[piece]["infusions"]:
                     msg = " Test4 {0} {1}".format(statname, itemname)
-                data.add_field(name=piece, value=iconurl + msg, inline=False)
-                data.set_image(url=iconurl)
+                data.add_field(name=piece, value="iconurl+" "+msg", inline=False)
         data.set_author(name=character)
         data.set_footer(text="A level {0} {1} ".format(
             level, profession.lower()), icon_url=icon)
