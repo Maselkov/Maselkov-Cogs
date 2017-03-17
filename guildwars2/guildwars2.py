@@ -404,7 +404,7 @@ class GuildWars2:
             if gear[piece]["id"] is not None:
                 statname = await self._getstatname_(gear[piece]["statname"])
                 itemname = await self._get_item_name_(gear[piece]["id"])
-		iconurl = await self._get_icon_url_(gear[piece]["icon"])
+                iconurl = await self._get_icon_url_(gear[piece]["icon"])
                 if gear[piece]["upgrades"]:
                     upgrade = await self._get_item_name_(gear[piece]["upgrades"])
                 if gear[piece]["infusions"]:
