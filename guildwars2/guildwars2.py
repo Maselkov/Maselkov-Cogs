@@ -420,13 +420,13 @@ class GuildWars2:
                         statname, itemname, infusion)
                 elif not gear[piece]["upgrades"] and not gear[piece]["infusions"]:
                     msg = "Test4 {0} {1}".format(statname, itemname)
-                data.add_field(name=id, value=iconurl, inline=False)
                 data.add_field(name=piece, value=iconurl + " " + msg, inline=False)
         data.set_author(name=character)
         data.set_footer(text="A level {0} {1} ".format(
             level, profession.lower()), icon_url=icon)
         try:
             await self.bot.say(embed=data)
+            await self.bot.say("https://render.guildwars2.com/file/D4FC06FD1B58AF62E771D7747C66F0E8FAAB8054/699216.png")
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
