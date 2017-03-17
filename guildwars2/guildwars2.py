@@ -422,7 +422,7 @@ class GuildWars2:
                     msg = "{0} {1}".format(statname, itemname)
                 data.add_field(name=piece, value=msg, inline=False)
         data.set_author(name=character)
-        data.set_footer(text="A level {0} {1} ".format(
+        data.set_footer(text="TEST A level {0} {1} ".format(
             level, profession.lower()), icon_url=icon)
         try:
             await self.bot.say(embed=data)
