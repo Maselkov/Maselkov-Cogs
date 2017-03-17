@@ -405,6 +405,7 @@ class GuildWars2:
                 statname = await self._getstatname_(gear[piece]["statname"])
                 itemname = await self._get_item_name_(gear[piece]["id"])
                 iconurl = await self._get_icon_url_(gear[piece]["id"])
+                data.set_thumbnail(url=iconurl)
                 if gear[piece]["upgrades"]:
                     upgrade = await self._get_item_name_(gear[piece]["upgrades"])
                 if gear[piece]["infusions"]:
@@ -413,7 +414,7 @@ class GuildWars2:
                     msg = "TEST1 {0} {1} with {2}".format(
                         statname, itemname, upgrade, icon_url=iconurl)
                 elif gear[piece]["upgrades"] and gear[piece]["infusions"]:
-                    msg = "+iconurl+" + " TEST2 {0} {1} with {2} and {3}".format(
+                    msg = iconurl + " TEST2 {0} {1} with {2} and {3}".format(
                         statname, itemname, upgrade, infusion, icon_url=iconurl)
                 elif gear[piece]["infusions"] and not gear[piece]["upgrades"]:
                     msg = "TEST3 {0} {1} with {2}".format(
