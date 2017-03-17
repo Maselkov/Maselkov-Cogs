@@ -826,7 +826,7 @@ class GuildWars2:
                 results = await self.call_api(endpoint)
             except APIError:
                 return None
-            name.append(results["icon"])
+            iconurl.append(results["icon"])
         else:
             for x in items:
                 endpoint = "items/{0}".format(x)
