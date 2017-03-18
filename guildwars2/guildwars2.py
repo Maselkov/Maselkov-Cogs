@@ -863,6 +863,7 @@ class GuildWars2:
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
+            return
         search = pve_pvp_wvw_fractals.lower()
         if search in valid_dailies:
             data = results[search]
@@ -880,6 +881,7 @@ class GuildWars2:
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
+            return
         output = "{0} dailes for today are: ```".format(search.capitalize())
         for x in results:
             output += "\n" + x["name"]
