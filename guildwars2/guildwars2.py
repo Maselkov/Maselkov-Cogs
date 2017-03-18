@@ -992,6 +992,8 @@ class GuildWars2:
         url = apiserv + endpoint
         async with self.session.get(url) as r:
             results = await r.json()
+        if "error" in results:
+            raise APIError("The API is dead!")
         if "text" in results:
             raise APIError(results["text"])
         return results
