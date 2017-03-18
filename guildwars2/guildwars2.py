@@ -855,6 +855,7 @@ class GuildWars2:
     @commands.command(pass_context=True)
     async def daily(self, ctx, pve_pvp_wvw_fractals):
         valid_dailies = ["pvp", "wvw", "pve", "fractals"]
+        user = ctx.message.author
         search = pve_pvp_wvw_fractals.lower()
         try:
             endpoint = "achievements/daily"
