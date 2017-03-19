@@ -34,6 +34,7 @@ class GuildWars2:
         self.keylist = dataIO.load_json("data/guildwars2/keys.json")
         self.settings = dataIO.load_json("data/guildwars2/settings.json")
         self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
+        self.build = dataIO.load_json("data/guildwars2/build.json")
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
     def __unload(self):
@@ -965,7 +966,7 @@ class GuildWars2:
                     for channel in channels:
                         await self.bot.send_message(self.bot.get_channel(channel),
                                                     "@here Guild Wars 2 has just updated! New build: "
-                                                    "`{0}`".format(self.gamedata["id"]))
+                                                    "`{0}`".format(self.build["id"]))
             await asyncio.sleep(60)
 
     def gold_to_coins(self, money):
@@ -1073,9 +1074,9 @@ class GuildWars2:
         except APIError:
             return False
         build = results["id"]
-        if not self.gamedata["id"] == build:
-            self.gamedata["id"] = build
-            dataIO.save_json('data/guildwars2/gamedata.json', self.gamedata)
+        if not self.build["id"] == build:
+            self.build["id"] = build
+            dataIO.save_json('data/guildwars2/build.json', self.build)
             return True
         else:
             return False
@@ -1108,7 +1109,8 @@ def check_files():
     files = {
         "gamedata.json": {},
         "settings.json": {"ENABLED": False},
-        "keys.json": {}
+        "keys.json": {},
+        "build.json": {"id": None} #Yay legacy support
     }
 
     for filename, value in files.items():
