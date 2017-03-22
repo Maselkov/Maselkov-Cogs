@@ -736,8 +736,8 @@ class GuildWars2:
         guild = guild.replace('%20', ' ')
         data.set_author(name=guild)
         for member in results:
-            
-            data.add_field(name=member['name'], value=member['rank'])
+            if member['rank'] is not 'invited':
+                data.add_field(name=member['name'], value=member['rank'])
 
         try:
             await self.bot.say(embed=data)
