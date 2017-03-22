@@ -743,7 +743,7 @@ class GuildWars2:
             return
 
         guild = guild.replace('%20', ' ')
-        data = discord.Embed(description='Members of {0}'.format(guild), colour=color)
+        data = discord.Embed(description='Members of {0}'.format(guild.title()), colour=color)
         data.set_author(name=guild)
 
         counter = 0
