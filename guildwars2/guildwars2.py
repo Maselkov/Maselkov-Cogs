@@ -763,7 +763,7 @@ class GuildWars2:
                              if counter < 20:
                                     data.add_field(name=member['name'], value=member['rank'])
                                     counter = counter + 1
-            order_id = order + 1
+            order_id = order_id + 1
 
                     #data.add_field(name=member['name'], value=member['rank'])
         try:
