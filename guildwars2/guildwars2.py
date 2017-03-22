@@ -746,7 +746,7 @@ class GuildWars2:
         counter = 0
         for member in results:
             counter = counter + 1
-            if counter < 51:
+            if counter < 25:
                 if member['rank'] != "invited":
                     data.add_field(name=member['name'], value=member['rank'])
 
