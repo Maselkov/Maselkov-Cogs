@@ -674,7 +674,7 @@ class GuildWars2:
         favor = results["favor"]
         member_count = results["member_count"]
 
-        data = discord.Embed(description='General Info about your guild', color=3447003)
+        data = discord.Embed(description='General Info about your guild', colour=user.colour)
         data.set_author(name=name + " [" + tag +"]")
         data.add_field(name='Influence', value=influence, inline=True)
         data.add_field(name='Aetherium', value=aetherium, inline=True)
@@ -733,7 +733,7 @@ class GuildWars2:
             return
 
         guild = guild.replace('%20', ' ')
-        data = discord.Embed(description='Members of {0}'.format(guild), color=3447003)
+        data = discord.Embed(description='Members of {0}'.format(guild), colour=user.colour)
         data.set_author(name=guild)
         for member in results:
             if member['rank'] != "invited":
