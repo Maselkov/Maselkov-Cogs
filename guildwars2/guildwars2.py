@@ -749,9 +749,9 @@ class GuildWars2:
         counter = 0
         order_id = 1
 
+        # For each order the rank has, go through each member and add it with the current order increment to the embed
         for order in ranks:
             for member in results:
-                #if counter < 25:
                 # Filter invited members
                 if member['rank'] != "invited":
                     member_rank = member['rank']
