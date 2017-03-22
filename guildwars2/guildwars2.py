@@ -668,13 +668,14 @@ class GuildWars2:
         favor = results["favor"]
         member_count = results["member_count"]
 
-        data = discord.Embed(description='General Info about your guild')
-        data.set_author(name=name + " " + tag)
+        data = discord.Embed(description='General Info about your guild', color=3447003)
+        data.set_author(name=name + " [" + tag +"]")
         data.add_field(name='Influence', value=influence, inline=True)
         data.add_field(name='Aetherium', value=aetherium, inline=True)
         data.add_field(name='Resonance', value=resonance, inline=True)
         data.add_field(name='Favor', value=favor, inline=True)
         data.add_field(name='Members', value=str(member_count)+"/"+str(member_cap), inline=True)
+        data.set_footer(text='A level {0} guild'.format(level))
 
         try:
             await self.bot.say(embed=data)
