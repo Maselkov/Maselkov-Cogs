@@ -866,7 +866,7 @@ class GuildWars2:
         else:
             wid = await self.getworldid(world)
         if not wid:
-            await self.bot.say("Invalid world name and no key associated with your account")
+            await self.bot.say("Invalid world name")
             return
         try:
             endpoint = "wvw/matches?world={0}".format(wid)
@@ -899,31 +899,23 @@ class GuildWars2:
             for objective in m["objectives"]:
                 if objective["owner"].lower() == worldcolor:
                     ppt += objective["points_tick"]
+        if population == "VeryHigh":
+            population = "Very high"
         kills = results["kills"][worldcolor]
         deaths = results["deaths"][worldcolor]
-        kd = kills / deaths
+        kd = round((kills / deaths), 2)
         data = discord.Embed(description="Performance", colour=color)
         data.add_field(name="Score", value=score)
         data.add_field(name="Points per tick", value=ppt)
         data.add_field(name="Victory Points", value=victoryp)
-        data.add_field(name="K/D ratio", value=kd)
-        data.add_field(name="Population", value=population)
+        data.add_field(name="K/D ratio", value=kd, inline=False)
+        data.add_field(name="Population", value=population, inline=False)
         data.set_author(name=worldname)
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
-    async def getworldid(self, world):
-        try:
-            endpoint = "worlds?ids=all"
-            results = await self.call_api(endpoint)
-        except APIError:
-            return None
-        for w in results:
-            if w["name"].lower() == world.lower():
-                return w["id"]
-        return None
 
     @commands.command(pass_context=True)
     async def gw2wiki(self, ctx, *search):
@@ -1074,6 +1066,19 @@ class GuildWars2:
         gold, remainder = divmod(money, 10000)
         silver, copper = divmod(remainder, 100)
         return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
+
+    async def getworldid(self, world):
+        if world is None:
+            return None
+        try:
+            endpoint = "worlds?ids=all"
+            results = await self.call_api(endpoint)
+        except APIError:
+            return None
+        for w in results:
+            if w["name"].lower() == world.lower():
+                return w["id"]
+        return None
 
     async def _get_guild_(self, gid):
         endpoint = "guild/{0}".format(gid)
