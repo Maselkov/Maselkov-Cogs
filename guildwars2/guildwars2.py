@@ -124,7 +124,6 @@ class GuildWars2:
     @key.command(pass_context=True)
     async def info(self, ctx):
         """Information about your api key
-
         Requires a key
         """
         user = ctx.message.author
@@ -158,7 +157,6 @@ class GuildWars2:
     @commands.command(pass_context=True)
     async def account(self, ctx):
         """Information about your account
-
         Requires a key with account scope
         """
         user = ctx.message.author
@@ -211,7 +209,6 @@ class GuildWars2:
     @commands.command(pass_context=True)
     async def li(self, ctx):
         """Shows how many Legendary Insights you have
-
         Requires a key with inventories and characters scope
         """
         user = ctx.message.author
@@ -263,7 +260,6 @@ class GuildWars2:
     @commands.group(pass_context=True)
     async def character(self, ctx):
         """Character related commands
-
         Requires key with characters scope
         """
         if ctx.invoked_subcommand is None:
@@ -272,9 +268,7 @@ class GuildWars2:
     @character.command(name="info", pass_context=True)
     async def _info(self, ctx, *, character: str):
         """Info about the given character
-
         You must be the owner of given character.
-
         Requires a key with characters scope
         """
         scopes = ["characters"]
@@ -330,7 +324,6 @@ class GuildWars2:
     @character.command(name="list", pass_context=True)
     async def _list_(self, ctx):
         """Lists all your characters
-
         Requires a key with characters scope
         """
         user = ctx.message.author
@@ -356,9 +349,7 @@ class GuildWars2:
     @character.command(pass_context=True)
     async def gear(self, ctx, *, character: str):
         """Displays the gear of given character
-
         You must be the owner of given character.
-
         Requires a key with characters scope
         """
         user = ctx.message.author
@@ -397,16 +388,14 @@ class GuildWars2:
                         gear[piece]["statname"] = await self._getstats_(gear[piece]["id"])
         profession = results["profession"]
         level = results["level"]
-        icon = self.gamedata["professions"][profession.lower()]["icon"]
         color = self.gamedata["professions"][profession.lower()]["color"]
+        icon = self.gamedata["professions"][profession.lower()]["icon"]
         color = int(color, 0)
         data = discord.Embed(description="Gear", colour=color)
         for piece in pieces:
             if gear[piece]["id"] is not None:
                 statname = await self._getstatname_(gear[piece]["statname"])
                 itemname = await self._get_item_name_(gear[piece]["id"])
-                iconurl = await self._get_icon_url_(gear[piece]["id"])
-
                 if gear[piece]["upgrades"]:
                     upgrade = await self._get_item_name_(gear[piece]["upgrades"])
                 if gear[piece]["infusions"]:
@@ -422,20 +411,18 @@ class GuildWars2:
                         statname, itemname, infusion)
                 elif not gear[piece]["upgrades"] and not gear[piece]["infusions"]:
                     msg = "{0} {1}".format(statname, itemname)
-                data.add_field(name=piece, value=iconurl + " " + msg, inline=False)
+                data.add_field(name=piece, value=msg, inline=False)
         data.set_author(name=character)
         data.set_footer(text="A level {0} {1} ".format(
             level, profession.lower()), icon_url=icon)
         try:
             await self.bot.say(embed=data)
-            await self.bot.say("https://render.guildwars2.com/file/D4FC06FD1B58AF62E771D7747C66F0E8FAAB8054/699216.png")
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
     @commands.group(pass_context=True)
     async def wallet(self, ctx):
         """Wallet related commands.
-
         Require a key with the scope wallet
         """
         if ctx.invoked_subcommand is None:
@@ -509,7 +496,6 @@ class GuildWars2:
     @wallet.command(pass_context=True)
     async def show(self, ctx):
         """Shows most important currencies in your wallet
-
         Requires key with scope wallet
         """
         user = ctx.message.author
@@ -558,7 +544,6 @@ class GuildWars2:
     @wallet.command(pass_context=True)
     async def tokens(self, ctx):
         """Shows instance-specific currencies
-
         Requires key with scope wallet
         """
         user = ctx.message.author
@@ -607,7 +592,6 @@ class GuildWars2:
     @wallet.command(pass_context=True)
     async def maps(self, ctx):
         """Shows map-specific currencies
-
         Requires key with scope wallet
         """
         user = ctx.message.author
@@ -645,11 +629,51 @@ class GuildWars2:
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
+    @commands.group(pass_context=True)
+    async def guild(self,ctx):
+        """Guild related commands.
+        Require a key with the scope guild
+        """
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+    @guild.command(pass_context=True)
+    async def info(self,ctx, guildid):
+        """Information about your general guild stats
+        Requires a key with guild scope
+        """
+        user = ctx.message.author
+        scopes = ["guild"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "guild/{1}?access_token={0}".format(key, guildid)
+            results = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        influence = results["influence"]
+        aetherium = results["aetherium"]
+        resonance = results["resonance"]
+        favor = results["favor"]
+        member_count = results["member_count"]
+
+        data = discord.Embed(description='Guildinfo')
+        data.add_field(name='Influence', value=influence, inline=False)
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
 
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
         """PvP related commands.
-
         Require a key with the scope pvp
         """
         if ctx.invoked_subcommand is None:
@@ -658,7 +682,6 @@ class GuildWars2:
     @pvp.command(pass_context=True)
     async def stats(self, ctx):
         """Information about your general pvp stats
-
         Requires a key with pvp scope
         """
         user = ctx.message.author
@@ -703,9 +726,7 @@ class GuildWars2:
     @pvp.command(pass_context=True)
     async def professions(self, ctx, *, profession: str=None):
         """Information about your pvp profession stats.
-
         If no profession is given, defaults to general profession stats.
-
         Example: !pvp professions elementalist
         """
         user = ctx.message.author
@@ -791,7 +812,6 @@ class GuildWars2:
     @commands.command(pass_context=True)
     async def bosses(self, ctx):
         """Lists all the bosses you killed this week
-
         Requires a key with progression scope
         """
         user = ctx.message.author
@@ -830,7 +850,6 @@ class GuildWars2:
     @commands.command(pass_context=True)
     async def gw2wiki(self, ctx, *search):
         """Search the guild wars 2 wiki
-
         Returns the first result, will not always be accurate.
         """
         if not soupAvailable:
@@ -944,11 +963,9 @@ class GuildWars2:
     @gamebuild.command()
     async def globaltoggle(self, on_off: bool = None):
         """Toggles checking for new builds, globally.
-
         Note that in order to receive notifications you to
         set up notification channel and enable it per server using
         [p]gamebuild toggle
-
         Off by default.
         """
         if on_off is not None:
@@ -1044,26 +1061,6 @@ class GuildWars2:
             return None
         name = results["details"]["infix_upgrade"]["id"]
         return name
-
-    async def _get_icon_url_(self, items):
-        iconurl = []
-        if isinstance(items, int):
-            endpoint = "items/{0}".format(items)
-            try:
-                results = await self.call_api(endpoint)
-            except APIError:
-                return None
-            iconurl.append(results["icon"])
-        else:
-            for x in items:
-                endpoint = "items/{0}".format(x)
-                try:
-                    results = await self.call_api(endpoint)
-                except APIError:
-                    return None
-                iconurl.append(results["icon"])
-        iconurl = ", ".join(iconurl)
-        return iconurl
 
     async def _getstatname_(self, item):
         endpoint = "itemstats/{0}".format(item)
