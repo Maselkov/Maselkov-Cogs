@@ -34,6 +34,7 @@ class GuildWars2:
         self.keylist = dataIO.load_json("data/guildwars2/keys.json")
         self.settings = dataIO.load_json("data/guildwars2/settings.json")
         self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
+        self.build = dataIO.load_json("data/guildwars2/build.json")
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
 
     def __unload(self):
@@ -432,6 +433,220 @@ class GuildWars2:
             await self.bot.say("Need permission to embed links")
 
     @commands.group(pass_context=True)
+    async def wallet(self, ctx):
+        """Wallet related commands.
+
+        Require a key with the scope wallet
+        """
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+
+    @wallet.command(pass_context=True)
+    async def currencies(self, ctx):
+        """Returns a list of all currencies"""
+        user = ctx.message.author
+        try:
+            endpoint = "currencies?ids=all"
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        currlist = []
+        for currency in results:
+            currlist.append(currency["name"])
+        output = "Available currencies are: ```"
+        output += ", ".join(currlist) + "```"
+        await self.bot.say(output)
+
+    @wallet.command(pass_context=True)
+    async def currency(self, ctx, *, currency: str):
+        """Info about a currency. See [p]wallet currencies for list"""
+        user = ctx.message.author
+        try:
+            endpoint = "currencies?ids=all"
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        if currency.lower() == "gold":
+            currency = "coin"
+        cid = None
+        for curr in results:
+            if curr["name"].lower() == currency.lower():
+                cid = curr["id"]
+                desc = curr["description"]
+                icon = curr["icon"]
+        if not cid:
+            await self.bot.say("Invalid currency. See `[p]wallet currencies`")
+            return
+        data = discord.Embed(description="Currency", colour=user.colour)
+        scopes = ["wallet"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/wallet?access_token={0}".format(key)
+            wallet = await self.call_api(endpoint)
+            for item in wallet:
+                if item["id"] == 1 and cid == 1:
+                    count = self.gold_to_coins(item["value"])
+                else:
+                    if item["id"] == cid:
+                        count = item["value"]
+            data.add_field(name="Count", value=count, inline=False)
+        except:
+            pass
+        data.set_thumbnail(url=icon)
+        data.add_field(name="Description", value=desc, inline=False)
+        data.set_author(name=currency.title())
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
+    @wallet.command(pass_context=True)
+    async def show(self, ctx):
+        """Shows most important currencies in your wallet
+
+        Requires key with scope wallet
+        """
+        user = ctx.message.author
+        scopes = ["wallet"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/wallet?access_token={0}".format(key)
+            results = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        wallet = [{"count" : 0, "id" : 1, "name" : "Gold"},
+                  {"count" : 0, "id" : 4, "name" : "Gems"},
+                  {"count" : 0, "id" : 2, "name" : "Karma"},
+                  {"count" : 0, "id" : 3, "name" : "Laurels"},
+                  {"count" : 0, "id" : 18, "name" : "Transmutation Charges"},
+                  {"count" : 0, "id" : 23, "name" : "Spirit Shards"},
+                  {"count" : 0, "id" : 32, "name" : "Unbound Magic"},
+                  {"count" : 0, "id" : 15, "name" : "Badges of Honor"},
+                  {"count" : 0, "id" : 16, "name" : "Guild Commendations"}]
+        for x in wallet:
+            for curr in results:
+                if curr["id"] == x["id"]:
+                    x["count"] = curr["value"]
+        accountname = self.keylist[user.id]["account_name"]
+        data = discord.Embed(description="Wallet", colour=user.colour)
+        for x in wallet:
+            if x["name"] == "Gold":
+                x["count"] = self.gold_to_coins(x["count"])
+                data.add_field(name=x["name"], value=x["count"], inline=False)
+            elif x["name"] == "Gems":
+                data.add_field(name=x["name"], value=x["count"], inline=False)
+            else:
+                data.add_field(name=x["name"], value=x["count"])
+        data.set_author(name=accountname)
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
+    @wallet.command(pass_context=True)
+    async def tokens(self, ctx):
+        """Shows instance-specific currencies
+
+        Requires key with scope wallet
+        """
+        user = ctx.message.author
+        scopes = ["wallet"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/wallet?access_token={0}".format(key)
+            results = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        wallet = [{"count" : 0, "id" : 5, "name" : "Ascalonian Tears"},
+                  {"count" : 0, "id" : 6, "name" : "Shards of Zhaitan"},
+                  {"count" : 0, "id" : 9, "name" : "Seals of Beetletun"},
+                  {"count" : 0, "id" : 10, "name" : "Manifestos of the Moletariate"},
+                  {"count" : 0, "id" : 11, "name" : "Deadly Blooms"},
+                  {"count" : 0, "id" : 12, "name" : "Symbols of Koda"},
+                  {"count" : 0, "id" : 13, "name" : "Flame Legion Charr Carvings"},
+                  {"count" : 0, "id" : 14, "name" : "Knowledge Crystals"},
+                  {"count" : 0, "id" : 7, "name" : "Fractal relics"},
+                  {"count" : 0, "id" : 24, "name" : "Pristine Fractal Relics"},
+                  {"count" : 0, "id" : 28, "name" : "Magnetite Shards"}]
+        for x in wallet:
+            for curr in results:
+                if curr["id"] == x["id"]:
+                    x["count"] = curr["value"]
+        accountname = self.keylist[user.id]["account_name"]
+        accountname = self.keylist[user.id]["account_name"]
+        data = discord.Embed(description="Tokens", colour=user.colour)
+        for x in wallet:
+            if x["name"] == "Magnetite Shards":
+                data.add_field(name=x["name"], value=x["count"], inline=False)
+            else:
+                data.add_field(name=x["name"], value=x["count"])
+        data.set_author(name=accountname)
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
+    @wallet.command(pass_context=True)
+    async def maps(self, ctx):
+        """Shows map-specific currencies
+
+        Requires key with scope wallet
+        """
+        user = ctx.message.author
+        scopes = ["wallet"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint = "account/wallet?access_token={0}".format(key)
+            results = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        wallet = [{"count" : 0, "id" : 25, "name" : "Geodes"},
+                  {"count" : 0, "id" : 27, "name" : "Bandit Crests"},
+                  {"count" : 0, "id" : 19, "name" : "Airship Parts"},
+                  {"count" : 0, "id" : 22, "name" : "Lumps of Aurillium"},
+                  {"count" : 0, "id" : 20, "name" : "Ley Line Crystals"},
+                  {"count" : 0, "id" : 32, "name" : "Unbound Magic"}]
+        for x in wallet:
+            for curr in results:
+                if curr["id"] == x["id"]:
+                    x["count"] = curr["value"]
+        accountname = self.keylist[user.id]["account_name"]
+        accountname = self.keylist[user.id]["account_name"]
+        data = discord.Embed(description="Tokens", colour=user.colour)
+        for x in wallet:
+            data.add_field(name=x["name"], value=x["count"])
+        data.set_author(name=accountname)
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
+
+    @commands.group(pass_context=True)
     async def pvp(self, ctx):
         """PvP related commands.
 
@@ -442,7 +657,7 @@ class GuildWars2:
 
     @pvp.command(pass_context=True)
     async def stats(self, ctx):
-        """ssInformation about your general pvp stats
+        """Information about your general pvp stats
 
         Requires a key with pvp scope
         """
@@ -644,6 +859,7 @@ class GuildWars2:
     @commands.command(pass_context=True)
     async def daily(self, ctx, pve_pvp_wvw_fractals):
         valid_dailies = ["pvp", "wvw", "pve", "fractals"]
+        user = ctx.message.author
         search = pve_pvp_wvw_fractals.lower()
         try:
             endpoint = "achievements/daily"
@@ -651,6 +867,7 @@ class GuildWars2:
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
+            return
         search = pve_pvp_wvw_fractals.lower()
         if search in valid_dailies:
             data = results[search]
@@ -668,6 +885,7 @@ class GuildWars2:
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
+            return
         output = "{0} dailes for today are: ```".format(search.capitalize())
         for x in results:
             output += "\n" + x["name"]
@@ -751,8 +969,13 @@ class GuildWars2:
                     for channel in channels:
                         await self.bot.send_message(self.bot.get_channel(channel),
                                                     "@here Guild Wars 2 has just updated! New build: "
-                                                    "`{0}`".format(self.gamedata["id"]))
+                                                    "`{0}`".format(self.build["id"]))
             await asyncio.sleep(60)
+
+    def gold_to_coins(self, money):
+        gold, remainder = divmod(money, 10000)
+        silver, copper = divmod(remainder, 100)
+        return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
 
     async def _get_guild_(self, gid):
         endpoint = "guild/{0}".format(gid)
@@ -776,6 +999,8 @@ class GuildWars2:
         url = apiserv + endpoint
         async with self.session.get(url) as r:
             results = await r.json()
+        if "error" in results:
+            raise APIError("The API is dead!")
         if "text" in results:
             raise APIError(results["text"])
         return results
@@ -872,9 +1097,9 @@ class GuildWars2:
         except APIError:
             return False
         build = results["id"]
-        if not self.gamedata["id"] == build:
-            self.gamedata["id"] = build
-            dataIO.save_json('data/guildwars2/gamedata.json', self.gamedata)
+        if not self.build["id"] == build:
+            self.build["id"] = build
+            dataIO.save_json('data/guildwars2/build.json', self.build)
             return True
         else:
             return False
@@ -907,7 +1132,8 @@ def check_files():
     files = {
         "gamedata.json": {},
         "settings.json": {"ENABLED": False},
-        "keys.json": {}
+        "keys.json": {},
+        "build.json": {"id": None} #Yay legacy support
     }
 
     for filename, value in files.items():
