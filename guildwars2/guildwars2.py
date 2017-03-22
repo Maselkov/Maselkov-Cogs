@@ -674,7 +674,7 @@ class GuildWars2:
         data.add_field(name='Aetherium', value=aetherium, inline=True)
         data.add_field(name='Resonance', value=resonance, inline=True)
         data.add_field(name='Favor', value=favor, inline=True)
-        data.add_field(name='Members', value=member_count+"/"+member_cap, inline=True)
+        data.add_field(name='Members', value=str(member_count)+"/"+str(member_cap), inline=True)
 
         try:
             await self.bot.say(embed=data)
