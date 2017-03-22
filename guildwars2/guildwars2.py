@@ -718,9 +718,7 @@ class GuildWars2:
         scopes = ["guilds"]
         try:
             self._check_scopes_(user, scopes)
-            #key = self.keylist[user.id]["key"]
-            # Hardcoded key for my guild because i don't have leader permissions atm
-            key = 'B5D02605-B139-5A4D-8FFB-A3445A688FB8980C28FC-B660-4D6D-ADBF-C7E1411B90C3'
+            key = self.keylist[user.id]["key"]
             endpoint_id = "guild/search?name={0}".format(guild)
             guild_id = await self.call_api(endpoint_id)
             guild_id = str(guild_id).strip("['")
@@ -734,10 +732,11 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-
         data = discord.Embed(description='Members of {0}'.format(guild), color=3447003)
+        guild = guild.replace('%20', ' ')
+        data.set_author(name=guild)
         for member in results:
-            #test
+            
             data.add_field(name=member['name'], value=member['rank'])
 
         try:
