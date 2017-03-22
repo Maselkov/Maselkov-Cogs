@@ -651,8 +651,8 @@ class GuildWars2:
             key = self.keylist[user.id]["key"]
             endpoint_id = "guild/search?name={0}".format(guild)
             guild_id = await self.call_api(endpoint_id)
-            guild_id = guild_id.strip("['")
-            guild_id = guild_id.strip("']")
+            guild_id = str(guild_id).strip("['")
+            guild_id = str(guild_id).strip("']")
             endpoint = "guild/{1}?access_token={0}".format(key, guild_id)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
