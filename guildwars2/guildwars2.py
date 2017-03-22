@@ -737,6 +737,7 @@ class GuildWars2:
 
         data = discord.Embed(description='Members of {0}'.format(guild), color=3447003)
         for members in results:
+            #test
             data.add_field(name=results[members]["name"], value=results[members]["rank"])
 
         try:
