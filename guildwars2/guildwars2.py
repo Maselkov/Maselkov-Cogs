@@ -745,10 +745,7 @@ class GuildWars2:
         guild = guild.replace('%20', ' ')
         data = discord.Embed(description='Members of {0}'.format(guild), colour=color)
         data.set_author(name=guild)
-       # counter = 0
-
-        member_dict = {}
-
+        counter = 0
 
         for member in results:
             #counter = counter + 1
@@ -759,14 +756,13 @@ class GuildWars2:
             # associate order from /ranks with rank from /members
                 for rank in ranks:
                     if member_rank == rank['id']:
-                        #await self.bot.say('DEBUG: ' + member['name'] + ' has rank ' + member_rank + ' and rank has order ' + str(rank['order']))
-                        member_dict = {"order" : rank['order'], "rank" : member_rank, "member" : member['name']}
+                        await self.bot.say('DEBUG: ' + member['name'] + ' has rank ' + member_rank + ' and rank has order ' + str(rank['order']))
+                        if rank['order'] == 1:
+                            if counter < 20:
+                                data.add_field(name=member['name'], value=member['rank'])
+                                counter = counter + 1
 
-       for dict_order, dict_rank, dict_member in member_dict.iteritems(): 
-            await self.bot.say('DEBUG2: ' + dict_member + 'has rank ' + dict_rank + ' with order ' + str(dict_order))
-
-                        #data.add_field(name=member['name'], value=member['rank'])
-
+                    #data.add_field(name=member['name'], value=member['rank'])
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
