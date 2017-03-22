@@ -145,7 +145,8 @@ class GuildWars2:
         keyname = self.keylist[user.id]["name"]
         permissions = self.keylist[user.id]["permissions"]
         permissions = ', '.join(permissions)
-        data = discord.Embed(description=None, colour=user.colour)
+        color = self.getColor(user)
+        data = discord.Embed(description=None, colour=color)
         if keyname:
             data.add_field(name="Key name", value=keyname)
         data.add_field(name="Permissions", value=permissions)
@@ -182,7 +183,8 @@ class GuildWars2:
             hascommander = "Yes"
         else:
             hascommander = "No"
-        data = discord.Embed(description=None, colour=user.colour)
+        color = self.getColor(user)
+        data = discord.Embed(description=None, colour=color)
         data.add_field(name="Created account on", value=created)
         data.add_field(name="Has commander tag",
                        value=hascommander, inline=False)
@@ -479,7 +481,8 @@ class GuildWars2:
         if not cid:
             await self.bot.say("Invalid currency. See `[p]wallet currencies`")
             return
-        data = discord.Embed(description="Currency", colour=user.colour)
+        color = self.getColor(user)
+        data = discord.Embed(description="Currency", colour=color)
         scopes = ["wallet"]
         try:
             self._check_scopes_(user, scopes)
@@ -537,7 +540,8 @@ class GuildWars2:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
         accountname = self.keylist[user.id]["account_name"]
-        data = discord.Embed(description="Wallet", colour=user.colour)
+        color = self.getColor(user)
+        data = discord.Embed(description="Wallet", colour=color)
         for x in wallet:
             if x["name"] == "Gold":
                 x["count"] = self.gold_to_coins(x["count"])
@@ -589,7 +593,8 @@ class GuildWars2:
                     x["count"] = curr["value"]
         accountname = self.keylist[user.id]["account_name"]
         accountname = self.keylist[user.id]["account_name"]
-        data = discord.Embed(description="Tokens", colour=user.colour)
+        color = self.getColor(user)
+        data = discord.Embed(description="Tokens", colour=color)
         for x in wallet:
             if x["name"] == "Magnetite Shards":
                 data.add_field(name=x["name"], value=x["count"], inline=False)
@@ -633,7 +638,8 @@ class GuildWars2:
                     x["count"] = curr["value"]
         accountname = self.keylist[user.id]["account_name"]
         accountname = self.keylist[user.id]["account_name"]
-        data = discord.Embed(description="Tokens", colour=user.colour)
+        color = self.getColor(user)
+        data = discord.Embed(description="Tokens", colour=color)
         for x in wallet:
             data.add_field(name=x["name"], value=x["count"])
         data.set_author(name=accountname)
@@ -681,7 +687,8 @@ class GuildWars2:
         rankedwins = results["ladders"]["ranked"]["wins"] + \
             results["ladders"]["ranked"]["byes"]
         rankedwinratio = int((rankedwins / rankedgamesplayed) * 100)
-        data = discord.Embed(description=None, colour=user.colour)
+        color = self.getColor(user)
+        data = discord.Embed(description=None, colour=color)
         data.add_field(name="Rank", value=pvprank, inline=False)
         data.add_field(name="Total games played", value=totalgamesplayed)
         data.add_field(name="Total wins", value=totalwins)
@@ -744,7 +751,8 @@ class GuildWars2:
             lowestestwinrate = min(
                 professionsformat, key=lambda i: professionsformat[i]["winratio"])
             lowestwinrategames = professionsformat[lowestestwinrate]["winratio"]
-            data = discord.Embed(description="Professions", colour=user.colour)
+            color = self.getColor(user)
+            data = discord.Embed(description="Professions", colour=color)
             data.set_thumbnail(url=icon)
             data.add_field(name="Most played profession", value="{0}, with {1}".format(
                 mostplayed.capitalize(), mostplayedgames))
@@ -1157,6 +1165,13 @@ class GuildWars2:
             return None
         name = results["name"]
         return name
+
+    def getColor(self, user):
+        try:
+            color = user.colour
+        except:
+            color = discord.Embed.Empty
+        return color
 
     def get_channels(self):
         try:
