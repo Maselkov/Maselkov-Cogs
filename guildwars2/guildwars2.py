@@ -640,10 +640,10 @@ class GuildWars2:
     @guild.command(pass_context=True)
     async def info(self,ctx, guildid):
         """Information about your general guild stats
-        Requires a key with guild scope
+        Requires a key with guilds scope
         """
         user = ctx.message.author
-        scopes = ["guild"]
+        scopes = ["guilds"]
         try:
             self._check_scopes_(user, scopes)
             key = self.keylist[user.id]["key"]
