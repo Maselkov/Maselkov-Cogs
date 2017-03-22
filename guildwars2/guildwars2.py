@@ -742,8 +742,6 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
 
-        rank_order[][][]
-
         guild = guild.replace('%20', ' ')
         data = discord.Embed(description='Members of {0}'.format(guild), colour=color)
         data.set_author(name=guild)
