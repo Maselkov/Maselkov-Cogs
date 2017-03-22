@@ -735,7 +735,7 @@ class GuildWars2:
         guild = guild.replace('%20', ' ')
         data = discord.Embed(description='Members of {0}'.format(guild), colour=user.colour)
         data.set_author(name=guild)
-        i = 0
+        counter = 0
         for member in results:
             counter = counter + 1
             if counter <= 10:
