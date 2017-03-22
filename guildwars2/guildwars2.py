@@ -762,8 +762,8 @@ class GuildWars2:
                         #await self.bot.say('DEBUG: ' + member['name'] + ' has rank ' + member_rank + ' and rank has order ' + str(rank['order']))
                         member_dict = {"order" : rank['order'], "rank" : member_rank, "member" : member['name']}
 
-        for test in member_dict:
-            await self.bot.say('DEBUG2: ' + test['member'] + 'has rank ' + test['rank'] + ' with order ' + str(test['order']))
+       for dict_order, dict_rank, dict_member in member_dict.iteritems(): 
+            await self.bot.say('DEBUG2: ' + dict_member + 'has rank ' + dict_rank + ' with order ' + str(dict_order))
 
                         #data.add_field(name=member['name'], value=member['rank'])
 
