@@ -763,7 +763,7 @@ class GuildWars2:
                         member_dict = {"order" : rank['order'], "rank" : member_rank, "member" : member['name']}
 
         for test in member_dict:
-            await self.bot.say('DEBUG2: ' + test['member'] + 'has rank ' + test['rank'] + ' with order ' + test['order'])
+            await self.bot.say('DEBUG2: ' + test['member'] + 'has rank ' + test['rank'] + ' with order ' + str(test['order']))
 
                         #data.add_field(name=member['name'], value=member['rank'])
 
