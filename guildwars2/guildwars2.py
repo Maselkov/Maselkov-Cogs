@@ -638,9 +638,9 @@ class GuildWars2:
             await send_cmd_help(ctx)
 
     @guild.command(pass_context=True)
-    async def info(self,ctx, guild):
+    async def info(self,ctx, guild: str):
         """Information about general guild stats
-        Enter guilds name with quotation marks
+        Enter guilds name
         Requires a key with guilds scope
         """
         user = ctx.message.author
@@ -690,9 +690,8 @@ class GuildWars2:
             await self.bot.say("Need permission to embed links")
 
     @guild.command(pass_context=True)
-    async def id(self, ctx, guild):
+    async def id(self, ctx, guild: str):
         """Get ID of given guild's name
-        Use quotation marks for whitespaces in guildnames
         Doesn't require any keys/scopes"""
         user = ctx.message.author
         guild = guild.replace(' ', '%20')
@@ -710,7 +709,7 @@ class GuildWars2:
         await self.bot.say('ID of the guild {0} is: {1}'.format(guild,result))
 
     @guild.command(pass_context=True)
-    async def members(self, ctx, guild):
+    async def members(self, ctx, guild: str):
         """Get list of all members and their ranks
         Requires key with guilds scope and also Guild Leader permissions ingame"""
         user = ctx.message.author
