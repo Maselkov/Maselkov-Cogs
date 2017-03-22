@@ -731,6 +731,8 @@ class GuildWars2:
             guild_id = str(guild_id).strip("['")
             guild_id = str(guild_id).strip("']")
             endpoint = "guild/{1}/members?access_token={0}".format(key, guild_id)
+            ranks = await self.call_api(endpoint_ranks)
+            endpoint_ranks = "guild/{1}/ranks?access_token={0}".format(key, guild_id)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -740,15 +742,25 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
 
+        rank_order[][][]
+
         guild = guild.replace('%20', ' ')
         data = discord.Embed(description='Members of {0}'.format(guild), colour=color)
         data.set_author(name=guild)
         counter = 0
         for member in results:
             counter = counter + 1
-            if counter < 25:
-                if member['rank'] != "invited":
-                    data.add_field(name=member['name'], value=member['rank'])
+            #if counter < 25:
+            # Filter invited members
+            if member['rank'] != "invited":
+                member_rank = member['rank']
+                # associate order from /ranks with rank from /members
+                for rank in ranks:
+                    if member_rank == rank['id']:
+                        await self.bot.say('DEBUG: ' + member['name'] + ' has rank ' + member_rank + ' and rank has order ' + rank['order'])
+
+
+                        data.add_field(name=member['name'], value=member['rank'])
 
         try:
             await self.bot.say(embed=data)
