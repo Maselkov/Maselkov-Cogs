@@ -732,11 +732,12 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        data = discord.Embed(description='Members of {0}'.format(guild), color=3447003)
+
         guild = guild.replace('%20', ' ')
+        data = discord.Embed(description='Members of {0}'.format(guild), color=3447003)
         data.set_author(name=guild)
         for member in results:
-            if member['rank'] is not 'invited':
+            if member['rank'] is not 'invited ':
                 data.add_field(name=member['name'], value=member['rank'])
 
         try:
