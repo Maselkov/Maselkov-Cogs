@@ -638,16 +638,22 @@ class GuildWars2:
             await send_cmd_help(ctx)
 
     @guild.command(pass_context=True)
-    async def info(self,ctx, guildid):
-        """Information about your general guild stats
+    async def info(self,ctx, guild):
+        """Information about general guild stats
+        Enter guilds name with quotation marks
         Requires a key with guilds scope
         """
         user = ctx.message.author
+        guild = guild.replace(' ', '%20')
         scopes = ["guilds"]
         try:
             self._check_scopes_(user, scopes)
             key = self.keylist[user.id]["key"]
-            endpoint = "guild/{1}?access_token={0}".format(key, guildid)
+            endpoint_id = "guild/search?name={0}".format(guild)
+            guild_id = await self.call_api(endpoint_id)
+            guild_id = guild_id.strip("['")
+            guild_id = guild_id.strip("']")
+            endpoint = "guild/{1}?access_token={0}".format(key, guild_id)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
@@ -684,8 +690,9 @@ class GuildWars2:
             await self.bot.say("Need permission to embed links")
 
     @guild.command(pass_context=True)
-    async def search(self, ctx, guild):
+    async def id(self, ctx, guild):
         """Get ID of given guild's name
+        Use quotation marks for whitespaces in guildnames
         Doesn't require any keys/scopes"""
         user = ctx.message.author
         guild = guild.replace(' ', '%20')
@@ -701,8 +708,6 @@ class GuildWars2:
             return
         guild = guild.replace('%20', ' ')
         await self.bot.say('ID of the guild {0} is: {1}'.format(guild,result))
-
-
 
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
