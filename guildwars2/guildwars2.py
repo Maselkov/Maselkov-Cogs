@@ -675,7 +675,7 @@ class GuildWars2:
         data.add_field(name='Resonance', value=resonance, inline=True)
         data.add_field(name='Favor', value=favor, inline=True)
         data.add_field(name='Members', value=str(member_count)+"/"+str(member_cap), inline=True)
-        data.add_field(name='Message of the day:', value=motd)
+        data.add_field(name='Message of the day:', value=motd, inline = False)
         data.set_footer(text='A level {0} guild'.format(level))
 
         try:
