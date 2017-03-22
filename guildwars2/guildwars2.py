@@ -747,22 +747,23 @@ class GuildWars2:
         data.set_author(name=guild)
        # counter = 0
 
-       member_dict = {}
+        member_dict = {}
 
-    for member in results:
+
+        for member in results:
             #counter = counter + 1
             #if counter < 25:
             # Filter invited members
-        if member['rank'] != "invited":
-            member_rank = member['rank']
+            if member['rank'] != "invited":
+                member_rank = member['rank']
             # associate order from /ranks with rank from /members
-            for rank in ranks:
-                if member_rank == rank['id']:
-                    #await self.bot.say('DEBUG: ' + member['name'] + ' has rank ' + member_rank + ' and rank has order ' + str(rank['order']))
-                    member_dict = {"order" : rank['order'], "rank" : member_rank, "member" : member['name']}
+                for rank in ranks:
+                    if member_rank == rank['id']:
+                        #await self.bot.say('DEBUG: ' + member['name'] + ' has rank ' + member_rank + ' and rank has order ' + str(rank['order']))
+                        member_dict = {"order" : rank['order'], "rank" : member_rank, "member" : member['name']}
 
-    for test in member_dict:
-        await self.bot.say('DEBUG2: ' + test['member'] + 'has rank ' + test['rank'] + ' with order ' + test['order'])
+        for test in member_dict:
+            await self.bot.say('DEBUG2: ' + test['member'] + 'has rank ' + test['rank'] + ' with order ' + test['order'])
 
                         #data.add_field(name=member['name'], value=member['rank'])
 
