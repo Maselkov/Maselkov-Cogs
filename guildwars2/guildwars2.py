@@ -650,6 +650,7 @@ class GuildWars2:
         Requires a key with guilds scope
         """
         user = ctx.message.author
+        color = self.getColor(user)
         guild = guild.replace(' ', '%20')
         scopes = ["guilds"]
         try:
@@ -680,7 +681,7 @@ class GuildWars2:
         favor = results["favor"]
         member_count = results["member_count"]
 
-        data = discord.Embed(description='General Info about your guild', colour=user.colour)
+        data = discord.Embed(description='General Info about your guild', colour=color)
         data.set_author(name=name + " [" + tag +"]")
         data.add_field(name='Influence', value=influence, inline=True)
         data.add_field(name='Aetherium', value=aetherium, inline=True)
@@ -719,6 +720,7 @@ class GuildWars2:
         """Get list of all members and their ranks
         Requires key with guilds scope and also Guild Leader permissions ingame"""
         user = ctx.message.author
+        color = self.getColor(user)
         guild = guild.replace(' ', '%20')
         scopes = ["guilds"]
         try:
@@ -739,7 +741,7 @@ class GuildWars2:
             return
 
         guild = guild.replace('%20', ' ')
-        data = discord.Embed(description='Members of {0}'.format(guild), colour=user.colour)
+        data = discord.Embed(description='Members of {0}'.format(guild), colour=color)
         data.set_author(name=guild)
         counter = 0
         for member in results:
