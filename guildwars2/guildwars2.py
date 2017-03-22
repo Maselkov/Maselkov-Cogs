@@ -745,22 +745,24 @@ class GuildWars2:
         guild = guild.replace('%20', ' ')
         data = discord.Embed(description='Members of {0}'.format(guild), colour=color)
         data.set_author(name=guild)
-        counter = 0
 
-        for member in results:
-            #counter = counter + 1
-            #if counter < 25:
-            # Filter invited members
-            if member['rank'] != "invited":
-                member_rank = member['rank']
-            # associate order from /ranks with rank from /members
-                for rank in ranks:
-                    if member_rank == rank['id']:
-                        await self.bot.say('DEBUG: ' + member['name'] + ' has rank ' + member_rank + ' and rank has order ' + str(rank['order']))
-                        if rank['order'] == 1:
-                            if counter < 20:
-                                data.add_field(name=member['name'], value=member['rank'])
-                                counter = counter + 1
+        counter = 0
+        order_id = 1
+
+        for order in ranks:
+            for member in results:
+                #if counter < 25:
+                # Filter invited members
+                if member['rank'] != "invited":
+                    member_rank = member['rank']
+                    # associate order from /ranks with rank from /members
+                    for rank in ranks:
+                        if member_rank == rank['id']:
+                            await self.bot.say('DEBUG: ' + member['name'] + ' has rank ' + member_rank + ' and rank has order ' + str(rank['order']))
+                            if rank['order'] == order_id:
+                             if counter < 20:
+                                    data.add_field(name=member['name'], value=member['rank'])
+                                    counter = counter + 1
 
                     #data.add_field(name=member['name'], value=member['rank'])
         try:
