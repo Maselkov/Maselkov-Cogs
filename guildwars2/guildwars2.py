@@ -732,6 +732,7 @@ class GuildWars2:
             guild_id = str(guild_id).strip("']")
             endpoint = "guild/{1}/members?access_token={0}".format(key, guild_id)
             endpoint_ranks = "guild/{1}/ranks?access_token={0}".format(key, guild_id)
+            ranks = await self.call_api(endpoint_ranks)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
             await self.bot.say(e)
