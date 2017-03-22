@@ -824,6 +824,100 @@ class GuildWars2:
                 output += "```"
                 await self.bot.say(output.format(user))
 
+    @commands.group(pass_context=True)
+    async def wvw(self, ctx):
+        """Commands related to wvw"""
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+
+    @wvw.command(pass_context=True)
+    async def worlds(self, ctx):
+        """List all worlds
+        """
+        user = ctx.message.author
+        try:
+            endpoint = "worlds?ids=all"
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        output = "Available worlds are: ```"
+        for world in results:
+            output += world["name"] + ", "
+        output += "```"
+        await self.bot.say(output)
+
+    @wvw.command(pass_context=True, name="info")
+    async def worldinfo(self, ctx, *, world: str=None):
+        """Info about a world. If none is provided, defaults to account's world
+        """
+        user = ctx.message.author
+        if not world and user.id in self.keylist:
+            try:
+                key = self.keylist[user.id]["key"]
+                endpoint = "account/?access_token={0}".format(key)
+                results = await self.call_api(endpoint)
+                wid = results["world"]
+            except APIError as e:
+                await self.bot.say("{0.mention}, API has responded with the following error: "
+                                   "`{1}`".format(user, e))
+                return
+        else:
+            wid = await self.getworldid(world)
+        if not wid:
+            await self.bot.say("Invalid world name")
+            return
+        try:
+            endpoint = "wvw/matches?world={0}".format(wid)
+            results = await self.call_api(endpoint)
+            endpoint_ = "worlds?id={0}".format(wid)
+            worldinfo = await self.call_api(endpoint_)
+            worldname = worldinfo["name"]
+            population = worldinfo["population"]
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        worldcolor = ""
+        for key, value in results["all_worlds"].items():
+            if wid in value:
+                worldcolor = key
+        if not worldcolor:
+            await self.bot.say("Could not resolve world's color")
+            return
+        if worldcolor == "red":
+            color = discord.Colour.red()
+        elif worldcolor == "green":
+            color = discord.Colour.green()
+        else:
+            color = discord.Colour.blue()
+        score = results["scores"][worldcolor]
+        ppt = 0
+        victoryp = results["victory_points"][worldcolor]
+        for m in results["maps"]:
+            for objective in m["objectives"]:
+                if objective["owner"].lower() == worldcolor:
+                    ppt += objective["points_tick"]
+        if population == "VeryHigh":
+            population = "Very high"
+        kills = results["kills"][worldcolor]
+        deaths = results["deaths"][worldcolor]
+        kd = round((kills / deaths), 2)
+        data = discord.Embed(description="Performance", colour=color)
+        data.add_field(name="Score", value=score)
+        data.add_field(name="Points per tick", value=ppt)
+        data.add_field(name="Victory Points", value=victoryp)
+        data.add_field(name="K/D ratio", value=kd, inline=False)
+        data.add_field(name="Population", value=population, inline=False)
+        data.set_author(name=worldname)
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
+
     @commands.command(pass_context=True)
     async def gw2wiki(self, ctx, *search):
         """Search the guild wars 2 wiki
@@ -973,6 +1067,19 @@ class GuildWars2:
         gold, remainder = divmod(money, 10000)
         silver, copper = divmod(remainder, 100)
         return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
+
+    async def getworldid(self, world):
+        if world is None:
+            return None
+        try:
+            endpoint = "worlds?ids=all"
+            results = await self.call_api(endpoint)
+        except APIError:
+            return None
+        for w in results:
+            if w["name"].lower() == world.lower():
+                return w["id"]
+        return None
 
     async def _get_guild_(self, gid):
         endpoint = "guild/{0}".format(gid)
