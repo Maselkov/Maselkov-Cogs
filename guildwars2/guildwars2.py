@@ -735,9 +735,12 @@ class GuildWars2:
         guild = guild.replace('%20', ' ')
         data = discord.Embed(description='Members of {0}'.format(guild), colour=user.colour)
         data.set_author(name=guild)
+        i = 0
         for member in results:
-            if member['rank'] != "invited":
-                data.add_field(name=member['name'], value=member['rank'])
+            counter = counter + 1
+            if counter < 10:
+                if member['rank'] != "invited":
+                    data.add_field(name=member['name'], value=member['rank'])
 
         try:
             await self.bot.say(embed=data)
