@@ -709,6 +709,41 @@ class GuildWars2:
         guild = guild.replace('%20', ' ')
         await self.bot.say('ID of the guild {0} is: {1}'.format(guild,result))
 
+    @guild.command(pass_context=True)
+    async def members(self, ctx, guild):
+        """Get list of all members and their ranks
+        Requires key with guilds scope and also Guild Leader permissions ingame"""
+        user = ctx.message.author
+        guild = guild.replace(' ', '%20')
+        scopes = ["guilds"]
+        try:
+            self._check_scopes_(user, scopes)
+            #key = self.keylist[user.id]["key"]
+            # Hardcoded key for my guild because i don't have leader permissions atm
+            key = 'B5D02605-B139-5A4D-8FFB-A3445A688FB8980C28FC-B660-4D6D-ADBF-C7E1411B90C3'
+            endpoint_id = "guild/search?name={0}".format(guild)
+            guild_id = await self.call_api(endpoint_id)
+            guild_id = str(guild_id).strip("['")
+            guild_id = str(guild_id).strip("']")
+            endpoint = "guild/{1}/members?access_token={0}".format(key, guild_id)
+            results = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        data = discord.Embed(description='Members of {0}'.format(guild), color=3447003)
+        for members in results:
+            data.add_field(name=results[members]["name"], value=results[members]["rank"])
+
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
         """PvP related commands.
