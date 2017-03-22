@@ -657,14 +657,25 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
 
+        level = results ["level"]
+        name = results ["name"]
+        tag = results ["tag"]
+        member_cap = results ["member_capacity"]
+        motd = results ["motd"]
         influence = results["influence"]
         aetherium = results["aetherium"]
         resonance = results["resonance"]
         favor = results["favor"]
         member_count = results["member_count"]
 
-        data = discord.Embed(description='Guildinfo')
-        data.add_field(name='Influence', value=influence, inline=False)
+        data = discord.Embed(description='General Info about your guild')
+        data.set_author(name=name + " " + tag)
+        data.add_field(name='Influence', value=influence, inline=True)
+        data.add_field(name='Aetherium', value=aetherium, inline=True)
+        data.add_field(name='Resonance', value=resonance, inline=True)
+        data.add_field(name='Favor', value=favor, inline=True)
+        data.add_field(name='Members', value=member_count+"/"+member_cap, inline=True)
+
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
