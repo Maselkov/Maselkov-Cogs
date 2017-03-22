@@ -683,6 +683,26 @@ class GuildWars2:
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
+    @guild.command(pass_context=True)
+    async def search(self, ctx, guild):
+        """Get ID of given guild's name
+        Doesn't require any keys/scopes"""
+        user = ctx.message.author
+        guild = guild.replace(' ', '%20')
+        try:
+            endpoint = "guild/search?name={0}".format(guild)
+            result = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        guild = guild.replace('%20', ' ')
+        await self.bot.say('ID of the guild {0} is: {1}'.format(guild,result))
+
+
 
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
