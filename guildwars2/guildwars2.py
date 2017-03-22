@@ -737,8 +737,8 @@ class GuildWars2:
         data = discord.Embed(description='Members of {0}'.format(guild), color=3447003)
         data.set_author(name=guild)
         for member in results:
-            await self.bot.say('DEBUG ' + member['rank']+ "ende")
-            if member['rank'] is not "invited":
+            await self.bot.say('DEBUG ' + type(member['rank']))
+            if member['rank'] != "invited":
                 data.add_field(name=member['name'], value=member['rank'])
 
         try:
