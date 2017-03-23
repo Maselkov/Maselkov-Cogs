@@ -1245,9 +1245,12 @@ class GuildWars2:
                     quantity = result ["quantity"]
                     price = result ["price"]
                     endpoint_items = "items/{0}".format(str(item_id))
+                    endpoint_listing = "commerce/listings/{0}".format(str(item_id))
+                    listings = await self.call_api(endpoint_items)
                     itemlist = await self.call_api(endpoint_items)
                     item_name = itemlist["name"]
-                    data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price))
+                    max_price = listings["unit_price"]
+                    data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price) + " | Max. offer: " + self.gold_to_coins(max_price))
                     counter = counter + 1
             try:
                 await self.bot.say(embed=data)
