@@ -635,13 +635,7 @@ class GuildWars2:
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
-    @commands.group(pass_context=True)
-    async def guild(self,ctx):
-        """Guild related commands.
-        Require a key with the scope guild
-        """
-        if ctx.invoked_subcommand is None:
-            await send_cmd_help(ctx)
+
 
     @guild.command(pass_context=True)
     async def info(self,ctx, *, guild: str):
@@ -812,41 +806,6 @@ class GuildWars2:
             rankedwinratio = int((rankedwins / rankedgamesplayed) * 100)
         else:
             rankedwinratio = 0
-<<<<<<< HEAD
-
-        if pvprank <= 9:
-            # Rabbit
-            rank_id = 1
-        elif pvprank <= 19:
-            # Deer
-            rank_id = 2
-        elif pvprank <= 29:
-            # Dolyak
-            rank_id = 3
-        elif pvprank <= 39:
-            # Wolf
-            rank_id = 4
-        elif pvprank <= 49:
-            # Tiger
-            rank_id = 5
-        elif pvprank <= 59:
-            # Bear
-            rank_id = 6
-        elif pvprank <= 69:
-            # Shark
-            rank_id = 7
-        elif pvprank <= 79:
-            # Phoenix
-            rank_id = 8
-        elif pvprank >= 80:
-            # Dragon
-            rank_id = 9
-
-        endpoint_ranks = "pvp/ranks/{0}".format(rank_id)
-        rank = await self.call_api(endpoint_ranks)
-        rank_icon = rank["icon"]
-
-=======
         #TODO some better way of doing this
         if pvprank <= 9:
             rank_id = 1
@@ -874,7 +833,6 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
         rank_icon = rank["icon"]
->>>>>>> 0dd9ba606389df4a9930335c4f27b8d06654c5c5
         color = self.getColor(user)
         data = discord.Embed(description=None, colour=color)
         data.add_field(name="Rank", value=pvprank, inline=False)
@@ -1223,6 +1181,49 @@ class GuildWars2:
             await self.bot.say("I will not send "
                                "notifications about new builds")
         dataIO.save_json('data/guildwars2/settings.json', self.settings)
+
+    @commands.command(pass_context=True)
+    async def tp(self,ctx):
+        """Commands related to tradingpost
+        Requires no additional scopes"""
+        if ctx.invoked_subcommand is None:
+            await
+            send_cmd_help(ctx)
+
+    @tp.command(pass_context=True)
+    async def current(self, ctx, state):
+        """Show current selling/buying transactions"""
+
+        user = ctx.message.author
+        color = self.getColor(user)
+
+        if state == "buys" or state == "sells":
+            try:
+                key = self.keylist[user.id]["key"]
+                endpoint = "commerce/transactions/current/{1}?access_token={0}".format(key,state)
+                results = await self.call_api(endpoint)
+            except APIKeyError as e:
+                await self.bot.say(e)
+                return
+            except APIError as e:
+                await self.bot.say("{0.mention}, API has responded with the following error: "
+                                   "`{1}`".format(user, e))
+                return
+
+            data = discord.Embed(description='Overview of your transactions', colour=color)
+
+            for buy in buys:
+                item_id = results["item_id"]
+                quantity = results ["quantity"]
+                price = results ["price"]
+                endpoint_items = "items/{0}".format(item_id)
+                itemlist = await self.call_api(endpoint_items)
+                item_name = itemlist["name"]
+                data.add_field(name=item_name, value=quantity + " x " + price)
+        else:
+            await self.bot.say("{0.mention}, Please us either sells or buys as Parameter for tp".format(user))
+
+
 
     @checks.is_owner()
     @gamebuild.command()
