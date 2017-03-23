@@ -1216,7 +1216,8 @@ class GuildWars2:
 
     @tp.command(pass_context=True)
     async def current(self, ctx, state):
-        """Show current selling/buying transactions"""
+        """Show current selling/buying transactions
+        invoke with sells or buys"""
 
         user = ctx.message.author
         color = self.getColor(user)
