@@ -1214,6 +1214,39 @@ class GuildWars2:
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
+    @tp.command(pass_context=True)
+    async def current(self, ctx, state):
+        """Show current selling/buying transactions"""
+
+        user = ctx.message.author
+        color = self.getColor(user)
+
+        if state == "buys" or state == "sells":
+            try:
+                key = self.keylist[user.id]["key"]
+                endpoint = "commerce/transactions/current/{1}?access_token={0}".format(key,state)
+                results = await self.call_api(endpoint)
+            except APIKeyError as e:
+                await self.bot.say(e)
+                return
+            except APIError as e:
+                await self.bot.say("{0.mention}, API has responded with the following error: "
+                                   "`{1}`".format(user, e))
+                return
+
+            data = discord.Embed(description='Overview of your transactions', colour=color)
+
+            for buy in buys:
+                item_id = results["item_id"]
+                quantity = results ["quantity"]
+                price = results ["price"]
+                endpoint_items = "items/{0}".format(item_id)
+                itemlist = await self.call_api(endpoint_items)
+                item_name = itemlist["name"]
+                data.add_field(name=item_name, value=quantity + " x " + price)
+        else:
+            await self.bot.say("{0.mention}, Please us either sells or buys as Parameter for tp".format(user))
+
 
 
     async def _gamebuild_checker(self):
