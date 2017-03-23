@@ -1259,6 +1259,7 @@ class GuildWars2:
                     max_price = offers[0]["unit_price"]
                     data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price) + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
                     counter = counter + 1
+                    
             try:
                 await self.bot.say(embed=data)
             except discord.HTTPException:
