@@ -1244,9 +1244,11 @@ class GuildWars2:
             for result in results:
                 # Only display first 20 transactions
                 if counter < 20:
+                    # Store data about transaction
                     item_id = result["item_id"]
                     quantity = result ["quantity"]
                     price = result ["price"]
+                    # Get general data about item and other listings
                     endpoint_items = "items/{0}".format(str(item_id))
                     endpoint_listing = "commerce/listings/{0}".format(str(item_id))
                     listings = await self.call_api(endpoint_listing)
@@ -1254,7 +1256,7 @@ class GuildWars2:
                     item_name = itemlist["name"]
                     offers = listings[state]
                     max_price = offers[0]["unit_price"]
-                    data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price) + " | Max. offer: " + self.gold_to_coins(max_price))
+                    data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price) + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
                     counter = counter + 1
             try:
                 await self.bot.say(embed=data)
