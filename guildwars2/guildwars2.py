@@ -1236,14 +1236,19 @@ class GuildWars2:
 
             data = discord.Embed(description='Overview of your transactions', colour=color)
 
+            counter = 0
+
             for result in results:
-                item_id = result["item_id"]
-                quantity = result ["quantity"]
-                price = result ["price"]
-                endpoint_items = "items/{0}".format(str(item_id))
-                itemlist = await self.call_api(endpoint_items)
-                item_name = itemlist["name"]
-                data.add_field(name=item_name, value=str(quantity) + " x " + str(price))
+                # Only display first 20 transactions
+                while counter < 20:
+                    item_id = result["item_id"]
+                    quantity = result ["quantity"]
+                    price = result ["price"]
+                    endpoint_items = "items/{0}".format(str(item_id))
+                    itemlist = await self.call_api(endpoint_items)
+                    item_name = itemlist["name"]
+                    data.add_field(name=item_name, value=str(quantity) + " x " + gold_to_coins(self, price))
+                    counter = counter + 1
             try:
                 await self.bot.say(embed=data)
             except discord.HTTPException:
