@@ -1247,7 +1247,7 @@ class GuildWars2:
                     endpoint_items = "items/{0}".format(str(item_id))
                     itemlist = await self.call_api(endpoint_items)
                     item_name = itemlist["name"]
-                    data.add_field(name=item_name, value=str(quantity) + " x " + gold_to_coins(self, price))
+                    data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price))
                     counter = counter + 1
             try:
                 await self.bot.say(embed=data)
