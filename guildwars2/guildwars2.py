@@ -1240,10 +1240,10 @@ class GuildWars2:
                 item_id = results["item_id"]
                 quantity = results ["quantity"]
                 price = results ["price"]
-                endpoint_items = "items/{0}".format(item_id)
+                endpoint_items = "items/{0}".format(str(item_id))
                 itemlist = await self.call_api(endpoint_items)
                 item_name = itemlist["name"]
-                data.add_field(name=item_name, value=quantity + " x " + price)
+                data.add_field(name=item_name, value=str(quantity) + " x " + str(price))
             try:
                 await self.bot.say(embed=data)
             except discord.HTTPException:
