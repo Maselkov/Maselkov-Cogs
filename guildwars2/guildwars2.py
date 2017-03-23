@@ -812,39 +812,33 @@ class GuildWars2:
             rankedwinratio = int((rankedwins / rankedgamesplayed) * 100)
         else:
             rankedwinratio = 0
-
+        #TODO some better way of doing this
         if pvprank <= 9:
-            # Rabbit
             rank_id = 1
         elif pvprank <= 19:
-            # Deer
             rank_id = 2
         elif pvprank <= 29:
-            # Dolyak
             rank_id = 3
         elif pvprank <= 39:
-            # Wolf
             rank_id = 4
         elif pvprank <= 49:
-            # Tiger
             rank_id = 5
         elif pvprank <= 59:
-            # Bear
             rank_id = 6
         elif pvprank <= 69:
-            # Shark
             rank_id = 7
         elif pvprank <= 79:
-            # Phoenix
             rank_id = 8
         elif pvprank >= 80:
-            # Dragon
             rank_id = 9
-
         endpoint_ranks = "pvp/ranks/{0}".format(rank_id)
-        rank = await self.call_api(endpoint_ranks)
+        try:
+            rank = await self.call_api(endpoint_ranks)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
         rank_icon = rank["icon"]
-
         color = self.getColor(user)
         data = discord.Embed(description=None, colour=color)
         data.add_field(name="Rank", value=pvprank, inline=False)
