@@ -1237,9 +1237,9 @@ class GuildWars2:
             data = discord.Embed(description='Overview of your transactions', colour=color)
 
             for result in results:
-                item_id = results["item_id"]
-                quantity = results ["quantity"]
-                price = results ["price"]
+                item_id = result["item_id"]
+                quantity = result ["quantity"]
+                price = result ["price"]
                 endpoint_items = "items/{0}".format(str(item_id))
                 itemlist = await self.call_api(endpoint_items)
                 item_name = itemlist["name"]
