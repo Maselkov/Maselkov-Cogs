@@ -635,7 +635,13 @@ class GuildWars2:
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
-
+    @commands.group(pass_context=True)
+    async def guild(self,ctx):
+        """Guild related commands.
+        Require a key with the scope guild
+        """
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
 
     @guild.command(pass_context=True)
     async def info(self,ctx, *, guild: str):
@@ -1182,48 +1188,6 @@ class GuildWars2:
                                "notifications about new builds")
         dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
-    # @commands.command(pass_context=True)
-    # async def tp(self,ctx):
-    #     """Commands related to tradingpost
-    #     Requires no additional scopes"""
-    #     if ctx.invoked_subcommand is None:
-    #         await send_cmd_help(ctx)
-
-    # @tp.command(pass_context=True)
-    # async def current(self, ctx, state):
-    #     """Show current selling/buying transactions"""
-    #
-    #     user = ctx.message.author
-    #     color = self.getColor(user)
-    #
-    #     if state == "buys" or state == "sells":
-    #         try:
-    #             key = self.keylist[user.id]["key"]
-    #             endpoint = "commerce/transactions/current/{1}?access_token={0}".format(key,state)
-    #             results = await self.call_api(endpoint)
-    #         except APIKeyError as e:
-    #             await self.bot.say(e)
-    #             return
-    #         except APIError as e:
-    #             await self.bot.say("{0.mention}, API has responded with the following error: "
-    #                                "`{1}`".format(user, e))
-    #             return
-    #
-    #         data = discord.Embed(description='Overview of your transactions', colour=color)
-    #
-    #         for buy in buys:
-    #             item_id = results["item_id"]
-    #             quantity = results ["quantity"]
-    #             price = results ["price"]
-    #             endpoint_items = "items/{0}".format(item_id)
-    #             itemlist = await self.call_api(endpoint_items)
-    #             item_name = itemlist["name"]
-    #             data.add_field(name=item_name, value=quantity + " x " + price)
-    #     else:
-    #         await self.bot.say("{0.mention}, Please us either sells or buys as Parameter for tp".format(user))
-
-
-
     @checks.is_owner()
     @gamebuild.command()
     async def globaltoggle(self, on_off: bool = None):
@@ -1430,4 +1394,4 @@ def setup(bot):
     n = GuildWars2(bot)
     loop = asyncio.get_event_loop()
     loop.create_task(n._gamebuild_checker())
-    bot.add_cog(n)
+bot.add_cog(n)
