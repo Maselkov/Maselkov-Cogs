@@ -1246,7 +1246,7 @@ class GuildWars2:
                     price = result ["price"]
                     endpoint_items = "items/{0}".format(str(item_id))
                     endpoint_listing = "commerce/listings/{0}".format(str(item_id))
-                    listings = await self.call_api(endpoint_items)
+                    listings = await self.call_api(endpoint_listing)
                     itemlist = await self.call_api(endpoint_items)
                     item_name = itemlist["name"]
                     offers = listings[state]
