@@ -1207,7 +1207,7 @@ class GuildWars2:
             await self.bot.say("Build checking is globally disabled")
         dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
-    @commands.command(pass_context=True)
+    @commands.group(pass_context=True)
     async def tp(self,ctx):
         """Commands related to tradingpost
         Requires no additional scopes"""
