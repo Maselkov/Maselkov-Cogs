@@ -854,7 +854,7 @@ class GuildWars2:
         data.add_field(name="Ranked winratio",
                        value="{}%".format(rankedwinratio))
         data.set_author(name=accountname)
-        data.set_image(rank_icon)
+        data.set_image(url=rank_icon)
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
