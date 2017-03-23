@@ -1240,7 +1240,7 @@ class GuildWars2:
 
             for result in results:
                 # Only display first 20 transactions
-                while counter < 20:
+                if counter < 20:
                     item_id = result["item_id"]
                     quantity = result ["quantity"]
                     price = result ["price"]
