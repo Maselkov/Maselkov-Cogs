@@ -1221,6 +1221,7 @@ class GuildWars2:
 
         user = ctx.message.author
         color = self.getColor(user)
+        state = state.lower
 
         if state == "buys" or state == "sells":
             try:
