@@ -1236,7 +1236,7 @@ class GuildWars2:
 
             data = discord.Embed(description='Overview of your transactions', colour=color)
 
-            for buy in buys:
+            for result in results:
                 item_id = results["item_id"]
                 quantity = results ["quantity"]
                 price = results ["price"]
