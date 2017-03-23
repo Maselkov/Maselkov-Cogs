@@ -1187,8 +1187,7 @@ class GuildWars2:
         """Commands related to tradingpost
         Requires no additional scopes"""
         if ctx.invoked_subcommand is None:
-            await
-            send_cmd_help(ctx)
+            await send_cmd_help(ctx)
 
     @tp.command(pass_context=True)
     async def current(self, ctx, state):
