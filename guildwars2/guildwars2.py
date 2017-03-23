@@ -801,7 +801,10 @@ class GuildWars2:
         pvprank = results["pvp_rank"] + results["pvp_rank_rollovers"]
         totalgamesplayed = sum(results["aggregate"].values())
         totalwins = results["aggregate"]["wins"] + results["aggregate"]["byes"]
-        totalwinratio = int((totalwins / totalgamesplayed) * 100)
+        if totalgamesplayed != 0:
+            totalwinratio = int((totalwins / totalgamesplayed) * 100)
+        else:
+            totalwinratio = 0
         rankedgamesplayed = sum(results["ladders"]["ranked"].values())
         rankedwins = results["ladders"]["ranked"]["wins"] + \
             results["ladders"]["ranked"]["byes"]
@@ -809,6 +812,7 @@ class GuildWars2:
             rankedwinratio = int((rankedwins / rankedgamesplayed) * 100)
         else:
             rankedwinratio = 0
+<<<<<<< HEAD
 
         if pvprank <= 9:
             # Rabbit
@@ -842,6 +846,35 @@ class GuildWars2:
         rank = await self.call_api(endpoint_ranks)
         rank_icon = rank["icon"]
 
+=======
+        #TODO some better way of doing this
+        if pvprank <= 9:
+            rank_id = 1
+        elif pvprank <= 19:
+            rank_id = 2
+        elif pvprank <= 29:
+            rank_id = 3
+        elif pvprank <= 39:
+            rank_id = 4
+        elif pvprank <= 49:
+            rank_id = 5
+        elif pvprank <= 59:
+            rank_id = 6
+        elif pvprank <= 69:
+            rank_id = 7
+        elif pvprank <= 79:
+            rank_id = 8
+        elif pvprank >= 80:
+            rank_id = 9
+        endpoint_ranks = "pvp/ranks/{0}".format(rank_id)
+        try:
+            rank = await self.call_api(endpoint_ranks)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+        rank_icon = rank["icon"]
+>>>>>>> 0dd9ba606389df4a9930335c4f27b8d06654c5c5
         color = self.getColor(user)
         data = discord.Embed(description=None, colour=color)
         data.add_field(name="Rank", value=pvprank, inline=False)
