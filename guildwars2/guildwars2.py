@@ -801,7 +801,10 @@ class GuildWars2:
         pvprank = results["pvp_rank"] + results["pvp_rank_rollovers"]
         totalgamesplayed = sum(results["aggregate"].values())
         totalwins = results["aggregate"]["wins"] + results["aggregate"]["byes"]
-        totalwinratio = int((totalwins / totalgamesplayed) * 100)
+        if totalgamesplayed != 0
+            totalwinratio = int((totalwins / totalgamesplayed) * 100)
+        else:
+            totalwinratio = 0
         rankedgamesplayed = sum(results["ladders"]["ranked"].values())
         rankedwins = results["ladders"]["ranked"]["wins"] + \
             results["ladders"]["ranked"]["byes"]
