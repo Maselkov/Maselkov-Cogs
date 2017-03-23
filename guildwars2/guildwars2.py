@@ -1234,7 +1234,10 @@ class GuildWars2:
                                    "`{1}`".format(user, e))
                 return
 
-            data = discord.Embed(description='Overview of your transactions', colour=color)
+            data = discord.Embed(description='Current ' + state , colour=color)
+            data.set_author('Overview of your transactions')
+            data.set_thumbnail(url="https://wiki.guildwars2.com/images/thumb/d/df/Black-Lion-Logo.png/300px-Black-Lion-Logo.png")
+            data.set_footer("Black Lion Trading Company")
 
             counter = 0
 
