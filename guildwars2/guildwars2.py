@@ -1247,8 +1247,7 @@ class GuildWars2:
             try:
                 await self.bot.say(embed=data)
             except discord.HTTPException:
-                await
-                self.bot.say("Need permission to embed links")
+                await self.bot.say("Need permission to embed links")
 
         else:
             await self.bot.say("{0.mention}, Please us either sells or buys as Parameter for tp".format(user))
