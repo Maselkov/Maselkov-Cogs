@@ -1182,12 +1182,12 @@ class GuildWars2:
                                "notifications about new builds")
         dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
-    @commands.command(pass_context=True)
-    async def tp(self,ctx):
-        """Commands related to tradingpost
-        Requires no additional scopes"""
-        if ctx.invoked_subcommand is None:
-            await send_cmd_help(ctx)
+    # @commands.command(pass_context=True)
+    # async def tp(self,ctx):
+    #     """Commands related to tradingpost
+    #     Requires no additional scopes"""
+    #     if ctx.invoked_subcommand is None:
+    #         await send_cmd_help(ctx)
 
     # @tp.command(pass_context=True)
     # async def current(self, ctx, state):
