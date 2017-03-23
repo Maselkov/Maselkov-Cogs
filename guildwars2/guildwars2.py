@@ -801,11 +801,50 @@ class GuildWars2:
         pvprank = results["pvp_rank"] + results["pvp_rank_rollovers"]
         totalgamesplayed = sum(results["aggregate"].values())
         totalwins = results["aggregate"]["wins"] + results["aggregate"]["byes"]
-        totalwinratio = int((totalwins / totalgamesplayed) * 100)
+        if totalgamesplayed != 0
+            totalwinratio = int((totalwins / totalgamesplayed) * 100)
+        else:
+            totalwinratio = 0
         rankedgamesplayed = sum(results["ladders"]["ranked"].values())
         rankedwins = results["ladders"]["ranked"]["wins"] + \
             results["ladders"]["ranked"]["byes"]
-        rankedwinratio = int((rankedwins / rankedgamesplayed) * 100)
+        if rankedgamesplayed != 0:
+            rankedwinratio = int((rankedwins / rankedgamesplayed) * 100)
+        else:
+            rankedwinratio = 0
+
+        if pvprank <= 9:
+            # Rabbit
+            rank_id = 1
+        elif pvprank <= 19:
+            # Deer
+            rank_id = 2
+        elif pvprank <= 29:
+            # Dolyak
+            rank_id = 3
+        elif pvprank <= 39:
+            # Wolf
+            rank_id = 4
+        elif pvprank <= 49:
+            # Tiger
+            rank_id = 5
+        elif pvprank <= 59:
+            # Bear
+            rank_id = 6
+        elif pvprank <= 69:
+            # Shark
+            rank_id = 7
+        elif pvprank <= 79:
+            # Phoenix
+            rank_id = 8
+        elif pvprank >= 80:
+            # Dragon
+            rank_id = 9
+
+        endpoint_ranks = "pvp/ranks/{0}".format(rank_id)
+        rank = await self.call_api(endpoint_ranks)
+        rank_icon = rank["icon"]
+
         color = self.getColor(user)
         data = discord.Embed(description=None, colour=color)
         data.add_field(name="Rank", value=pvprank, inline=False)
@@ -818,6 +857,7 @@ class GuildWars2:
         data.add_field(name="Ranked winratio",
                        value="{}%".format(rankedwinratio))
         data.set_author(name=accountname)
+        data.set_thumbnail(url=rank_icon)
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
