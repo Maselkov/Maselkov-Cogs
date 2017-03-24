@@ -1244,6 +1244,7 @@ class GuildWars2:
             counter = 0
             item_id=""
 
+
             # Collect listed items
             for result in results:
                 item_id += str(result["item_id"]) + ","
@@ -1254,6 +1255,7 @@ class GuildWars2:
             # Call API once for all items
             listings = await self.call_api(endpoint_listing)
             itemlist = await self.call_api(endpoint_items)
+
 
             for result in results:
                 # Only display first 20 transactions
