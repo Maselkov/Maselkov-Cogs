@@ -1207,6 +1207,77 @@ class GuildWars2:
             await self.bot.say("Build checking is globally disabled")
         dataIO.save_json('data/guildwars2/settings.json', self.settings)
 
+    @commands.group(pass_context=True)
+    async def tp(self,ctx):
+        """Commands related to tradingpost
+        Requires no additional scopes"""
+        if ctx.invoked_subcommand is None:
+            await send_cmd_help(ctx)
+
+    @tp.command(pass_context=True)
+    async def current(self, ctx, state):
+        """Show current selling/buying transactions
+        invoke with sells or buys"""
+
+        user = ctx.message.author
+        color = self.getColor(user)
+        state = state.lower()
+
+        if state == "buys" or state == "sells":
+            try:
+                key = self.keylist[user.id]["key"]
+                endpoint = "commerce/transactions/current/{1}?access_token={0}".format(key,state)
+                results = await self.call_api(endpoint)
+            except APIKeyError as e:
+                await self.bot.say(e)
+                return
+            except APIError as e:
+                await self.bot.say("{0.mention}, API has responded with the following error: "
+                                   "`{1}`".format(user, e))
+                return
+
+            data = discord.Embed(description='Current ' + state , colour=color)
+            data.set_author(name='Overview of your transactions')
+            data.set_thumbnail(url="https://wiki.guildwars2.com/images/thumb/d/df/Black-Lion-Logo.png/300px-Black-Lion-Logo.png")
+            data.set_footer(text="Black Lion Trading Company")
+
+            counter = 0
+            item_id=""
+
+
+            # Collect listed items
+            for result in results:
+                item_id += str(result["item_id"]) + ","
+
+            # Get information about all items, doesn't matter if string ends with ,
+            endpoint_items = "items?ids={0}".format(str(item_id))
+            endpoint_listing = "commerce/listings?ids={0}".format(str(item_id))
+            # Call API once for all items
+            listings = await self.call_api(endpoint_listing)
+            itemlist = await self.call_api(endpoint_items)
+
+
+            for result in results:
+                # Only display first 20 transactions
+                if counter < 20:
+                    # Store data about transaction
+                    quantity = result ["quantity"]
+                    price = result ["price"]
+                    item_name = itemlist[counter]["name"]
+                    offers = listings[counter][state]
+                    max_price = offers[0]["unit_price"]
+                    data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price) + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
+                    counter = counter + 1
+                    
+            try:
+                await self.bot.say(embed=data)
+            except discord.HTTPException:
+                await self.bot.say("Need permission to embed links")
+        else:
+            await self.bot.say("{0.mention}, Please us either sells or buys as Parameter for tp".format(user))
+
+
+
     async def _gamebuild_checker(self):
         while self is self.bot.get_cog("GuildWars2"):
             if self.settings["ENABLED"]:
