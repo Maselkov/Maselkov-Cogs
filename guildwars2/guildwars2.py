@@ -1243,7 +1243,6 @@ class GuildWars2:
 
             counter = 0
             item_id=""
-            listings=""
 
             # Collect listed items
             for result in results:
