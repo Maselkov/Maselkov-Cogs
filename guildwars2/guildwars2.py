@@ -1242,6 +1242,7 @@ class GuildWars2:
 
             counter = 0
 
+
             for result in results:
                 # Only display first 20 transactions
                 if counter < 20:
