@@ -1247,7 +1247,7 @@ class GuildWars2:
 
             # Collect listed items
             for result in results:
-                item_id += result["item_id"] + ","
+                item_id += str(result["item_id"]) + ","
 
             # Get information about all items, doesn't matter if string ends with ,
             endpoint_items = "items?ids={0}".format(str(item_id))
