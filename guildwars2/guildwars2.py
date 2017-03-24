@@ -643,8 +643,8 @@ class GuildWars2:
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
-    @guild.command(pass_context=True)
-    async def info(self,ctx, *, guild: str):
+    @guild.command(pass_context=True, name="info")
+    async def __info(self,ctx, *, guild: str):
         """Information about general guild stats
         Enter guilds name
         Requires a key with guilds scope
@@ -1292,7 +1292,13 @@ class GuildWars2:
     def gold_to_coins(self, money):
         gold, remainder = divmod(money, 10000)
         silver, copper = divmod(remainder, 100)
-        return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
+        if not gold:
+            if not silver:
+                return "{0} copper".format(copper)
+            else:
+                return "{0} silver and {1} copper".format(silver, copper)
+        else:
+            return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
 
     async def getworldid(self, world):
         if world is None:
