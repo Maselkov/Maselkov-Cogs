@@ -643,8 +643,8 @@ class GuildWars2:
         if ctx.invoked_subcommand is None:
             await send_cmd_help(ctx)
 
-    @guild.command(pass_context=True)
-    async def info(self,ctx, *, guild: str):
+    @guild.command(pass_context=True, name="info")
+    async def __info(self,ctx, *, guild: str):
         """Information about general guild stats
         Enter guilds name
         Requires a key with guilds scope
