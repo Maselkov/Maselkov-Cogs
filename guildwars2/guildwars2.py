@@ -1220,7 +1220,7 @@ class GuildWars2:
         user = ctx.message.author
         color = self.getColor(user)
         state = buys_sells.lower()
-        scopes = [tradingpost]
+        scopes = ["tradingpost"]
         if state == "buys" or state == "sells":
             try:
                 self._check_scopes_(user, scopes)
