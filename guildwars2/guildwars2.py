@@ -1402,8 +1402,8 @@ class GuildWars2:
                 if self.settings[server]["ON"]:
                     channels.append(self.settings[server]["CHANNEL"])
             return channels
-        except Exception:
-            return None
+        except:
+            return channels
 
     def get_announcement_channel(self, server):
         try:
