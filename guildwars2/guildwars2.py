@@ -1225,6 +1225,7 @@ class GuildWars2:
 
         user = ctx.message.author
         color = self.getColor(user)
+        state = state.lower()
 
         if state == "buys" or state == "sells":
             try:
@@ -1261,21 +1262,29 @@ class GuildWars2:
             data.set_footer(text="Black Lion Trading Company")
 
             counter = 0
+            item_id=""
+
+
+            # Collect listed items
+            for result in results:
+                item_id += str(result["item_id"]) + ","
+
+            # Get information about all items, doesn't matter if string ends with ,
+            endpoint_items = "items?ids={0}".format(str(item_id))
+            endpoint_listing = "commerce/listings?ids={0}".format(str(item_id))
+            # Call API once for all items
+            listings = await self.call_api(endpoint_listing)
+            itemlist = await self.call_api(endpoint_items)
+
 
             for result in results:
                 # Only display first 20 transactions
                 if counter < 20:
                     # Store data about transaction
-                    item_id = result["item_id"]
                     quantity = result ["quantity"]
                     price = result ["price"]
-                    # Get general data about item and other listings
-                    endpoint_items = "items/{0}".format(str(item_id))
-                    endpoint_listing = "commerce/listings/{0}".format(str(item_id))
-                    listings = await self.call_api(endpoint_listing)
-                    itemlist = await self.call_api(endpoint_items)
-                    item_name = itemlist["name"]
-                    offers = listings[state]
+                    item_name = itemlist[counter]["name"]
+                    offers = listings[counter][state]
                     max_price = offers[0]["unit_price"]
                     data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price) + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
                     counter = counter + 1
