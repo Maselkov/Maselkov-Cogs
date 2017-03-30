@@ -893,7 +893,9 @@ class GuildWars2:
         rank_id = 0
         rank_ids = [1,2,3,4,5,6,7,8,9]
 
+
         for rank in rank_ids:
+            # Get borders for rank ranges
             if multiplier != 0:
                 min = multiplier * 10
                 max = min + 9
@@ -901,8 +903,10 @@ class GuildWars2:
                 min = 0
                 max = 9
 
+            # Check if players rank is in range
             if pvprank >= min and pvprank <= max:
                 rank_id = rank
+            # If greater than the range it's a dragon
             elif pvprank >= 80:
                 rank_id = rank
             multiplier += 1
