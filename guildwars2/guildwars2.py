@@ -828,7 +828,7 @@ class GuildWars2:
 
         # Collect amounts
         for item in treasury:
-            if counter < 21:
+            if counter < 20:
                 current = item["count"]
                 item_name = itemlist[counter]["name"]
                 needed = item["needed_by"]
