@@ -712,6 +712,9 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
         guild = guild.replace('%20', ' ')
+        result = str(result).strip("['")
+        result = str(result).strip("']")
+
         await self.bot.say('ID of the guild {0} is: {1}'.format(guild, result))
 
     @guild.command(pass_context=True)
@@ -766,8 +769,80 @@ class GuildWars2:
                                 if counter < 20:
                                     data.add_field(
                                         name=member['name'], value=member['rank'])
-                                    counter = counter + 1
-            order_id = order_id + 1
+                                    counter += 1
+            order_id += 1
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
+
+    @guild.command(pass_context=True)
+    async def treasury(self, ctx, *, guild: str):
+        """Get list of current and needed items for upgrades
+                Requires key with guilds scope and also Guild Leader permissions ingame"""
+        user = ctx.message.author
+        color = self.getColor(user)
+        guild = guild.replace(' ', '%20')
+        scopes = ["guilds"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint_id = "guild/search?name={0}".format(guild)
+            guild_id = await self.call_api(endpoint_id)
+            guild_id = str(guild_id).strip("['")
+            guild_id = str(guild_id).strip("']")
+            endpoint = "guild/{1}/treasury?access_token={0}".format(
+                key, guild_id)
+            treasury = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        guild = guild.replace('%20', ' ')
+
+        data = discord.Embed(description='Treasury contents of {0}'.format(
+            guild.title()), colour=color)
+        data.set_author(name=guild.title())
+
+        counter = 0
+        item_counter = 0
+        amount = 0
+        item_id = ""
+
+        # Collect listed items
+        for item in treasury:
+            item_id += str(item["item_id"]) + ","
+
+        endpoint_items = "items?ids={0}".format(str(item_id))
+
+        # Call API once for all items
+        try:
+            itemlist = await self.call_api(endpoint_items)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        # Collect amounts
+        for item in treasury:
+            if counter < 20:
+                current = item["count"]
+                item_name = itemlist[item_counter]["name"]
+                needed = item["needed_by"]
+
+                for need in needed:
+                    amount = amount + need["count"]
+
+                if amount != current:
+                    data.add_field(name=item_name, value=str(current)+"/"+str(amount), inline=True)
+                    counter += 1
+                amount = 0
+                item_counter += 1
+
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
@@ -815,25 +890,27 @@ class GuildWars2:
             rankedwinratio = int((rankedwins / rankedgamesplayed) * 100)
         else:
             rankedwinratio = 0
-        # TODO some better way of doing this
-        if pvprank <= 9:
-            rank_id = 1
-        elif pvprank <= 19:
-            rank_id = 2
-        elif pvprank <= 29:
-            rank_id = 3
-        elif pvprank <= 39:
-            rank_id = 4
-        elif pvprank <= 49:
-            rank_id = 5
-        elif pvprank <= 59:
-            rank_id = 6
-        elif pvprank <= 69:
-            rank_id = 7
-        elif pvprank <= 79:
-            rank_id = 8
-        elif pvprank >= 80:
-            rank_id = 9
+
+        multiplier = 0
+        rank_id = 0
+        rank_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+        for rank in rank_ids:
+            # Get borders for rank ranges
+            if multiplier != 0:
+                min_needed = multiplier * 10
+                max_needed = min_needed + 9
+            else:
+                min_needed = 0
+                max_needed = 9
+            # Check if players rank is in range
+            if min_needed <= pvprank <= max_needed:
+                rank_id = rank
+            # If greater than the range it's a dragon
+            elif pvprank >= 80:
+                rank_id = rank
+            multiplier += 1
+
         endpoint_ranks = "pvp/ranks/{0}".format(rank_id)
         try:
             rank = await self.call_api(endpoint_ranks)
@@ -1069,7 +1146,7 @@ class GuildWars2:
         data.add_field(name="Score", value=score)
         data.add_field(name="Points per tick", value=ppt)
         data.add_field(name="Victory Points", value=victoryp)
-        data.add_field(name="K/D ratio", value=kd, inline=False)
+        data.add_field(name="K/D ratio", value=str(kd), inline=False)
         data.add_field(name="Population", value=population, inline=False)
         data.set_author(name=worldname)
         try:
@@ -1275,6 +1352,7 @@ class GuildWars2:
             await self.bot.say(embed=data)
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
+
 
     async def _gamebuild_checker(self):
         while self is self.bot.get_cog("GuildWars2"):
