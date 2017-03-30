@@ -1142,7 +1142,7 @@ class GuildWars2:
         data.add_field(name="Score", value=score)
         data.add_field(name="Points per tick", value=ppt)
         data.add_field(name="Victory Points", value=victoryp)
-        data.add_field(name="K/D ratio", value=kd, inline=False)
+        data.add_field(name="K/D ratio", value=str(kd), inline=False)
         data.add_field(name="Population", value=population, inline=False)
         data.set_author(name=worldname)
         try:
