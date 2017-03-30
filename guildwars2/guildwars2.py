@@ -815,25 +815,39 @@ class GuildWars2:
             rankedwinratio = int((rankedwins / rankedgamesplayed) * 100)
         else:
             rankedwinratio = 0
+
+        multiplier = 0
+        rank_ids = [1,2,3,4,5,6,7,8,9]
+
+        for rank in rank_ids:
+            if multiplier != 0:
+                min = multiplier * 10 +9
+            else:
+                min = 0
+            max = ( multiplier + 1 ) * 10 + 9
+
+            if pvprank >= min and pvprank <= max:
+                rank_id = rank
+                
         # TODO some better way of doing this
-        if pvprank <= 9:
-            rank_id = 1
-        elif pvprank <= 19:
-            rank_id = 2
-        elif pvprank <= 29:
-            rank_id = 3
-        elif pvprank <= 39:
-            rank_id = 4
-        elif pvprank <= 49:
-            rank_id = 5
-        elif pvprank <= 59:
-            rank_id = 6
-        elif pvprank <= 69:
-            rank_id = 7
-        elif pvprank <= 79:
-            rank_id = 8
-        elif pvprank >= 80:
-            rank_id = 9
+        # if pvprank <= 9:
+        #     rank_id = 1
+        # elif pvprank <= 19:
+        #     rank_id = 2
+        # elif pvprank <= 29:
+        #     rank_id = 3
+        # elif pvprank <= 39:
+        #     rank_id = 4
+        # elif pvprank <= 49:
+        #     rank_id = 5
+        # elif pvprank <= 59:
+        #     rank_id = 6
+        # elif pvprank <= 69:
+        #     rank_id = 7
+        # elif pvprank <= 79:
+        #     rank_id = 8
+        # elif pvprank >= 80:
+        #     rank_id = 9
         endpoint_ranks = "pvp/ranks/{0}".format(rank_id)
         try:
             rank = await self.call_api(endpoint_ranks)
