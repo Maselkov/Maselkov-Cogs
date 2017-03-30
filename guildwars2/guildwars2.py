@@ -828,6 +828,7 @@ class GuildWars2:
                 needed = item["needed_by"]["count"]
 
                 data.add_field(name=item_name, value=str(current)+"/"+str(needed))
+                counter = counter + 1
 
         try:
             await self.bot.say(embed=data)
