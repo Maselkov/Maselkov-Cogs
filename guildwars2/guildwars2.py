@@ -828,20 +828,23 @@ class GuildWars2:
             return
 
         # Collect amounts
-        for item in treasury:
-            if counter < 20:
-                current = item["count"]
-                item_name = itemlist[item_counter]["name"]
-                needed = item["needed_by"]
+        if treasury:
+            for item in treasury:
+                if counter < 20:
+                    current = item["count"]
+                    item_name = itemlist[item_counter]["name"]
+                    needed = item["needed_by"]
 
-                for need in needed:
-                    amount = amount + need["count"]
+                    for need in needed:
+                        amount = amount + need["count"]
 
-                if amount != current:
-                    data.add_field(name=item_name, value=str(current)+"/"+str(amount), inline=True)
-                    counter += 1
-                amount = 0
-                item_counter += 1
+                    if amount != current:
+                        data.add_field(name=item_name, value=str(current)+"/"+str(amount), inline=True)
+                        counter += 1
+                    amount = 0
+                    item_counter += 1
+        else:
+            await self.bot.say("Treasury is empty!")
 
         try:
             await self.bot.say(embed=data)
