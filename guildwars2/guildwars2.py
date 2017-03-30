@@ -809,6 +809,7 @@ class GuildWars2:
         data.set_author(name=guild.title())
 
         counter = 0
+        item_counter = 0
         amount = 0
         item_id = ""
 
@@ -830,7 +831,7 @@ class GuildWars2:
         for item in treasury:
             if counter < 20:
                 current = item["count"]
-                item_name = itemlist[counter]["name"]
+                item_name = itemlist[item_counter]["name"]
                 needed = item["needed_by"]
 
                 for need in needed:
@@ -838,10 +839,9 @@ class GuildWars2:
 
                 if amount != current:
                     data.add_field(name=item_name, value=str(current)+"/"+str(amount), inline=True)
-                else:
-                    counter = counter - 1
+                    counter = counter + 1
                 amount = 0
-                counter = counter + 1
+                item_counter = item_counter + 1
 
         try:
             await self.bot.say(embed=data)
