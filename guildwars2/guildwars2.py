@@ -804,7 +804,6 @@ class GuildWars2:
         data.set_author(name=guild.title())
 
         counter = 0
-        amount = 0
         item_id = ""
 
         # Collect listed items
@@ -829,6 +828,7 @@ class GuildWars2:
                 needed = item["needed_by"]
 
                 for need in needed:
+                    amount = 0
                     amount = amount + need["count"]
 
                 data.add_field(name=item_name, value=str(current)+"/"+str(amount))
