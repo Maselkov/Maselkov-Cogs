@@ -809,6 +809,7 @@ class GuildWars2:
         data.set_author(name=guild.title())
 
         counter = 0
+        amount = 0
         item_id = ""
 
         # Collect listed items
