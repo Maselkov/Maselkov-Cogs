@@ -828,7 +828,6 @@ class GuildWars2:
             return
 
         # Collect amounts
-<<<<<<< HEAD
         if treasury:
             for item in treasury:
                 if counter < 20:
@@ -846,7 +845,6 @@ class GuildWars2:
                     item_counter += 1
         else:
             await self.bot.say("Treasury is empty!")
-=======
         for item in treasury:
             if counter < 20:
                 current = item["count"]
@@ -861,7 +859,6 @@ class GuildWars2:
                     counter += 1
                 amount = 0
                 item_counter += 1
->>>>>>> 0e521f2f3c1592b29b1b0dba63865dfeb3f36c1b
 
         try:
             await self.bot.say(embed=data)
