@@ -799,11 +799,40 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
 
+        data = discord.Embed(description='Treasury contents of {0}'.format(
+            guild.title()), colour=color)
+        data.set_author(name=guild.title())
+
+        counter = 0
         item_id = ""
+
         # Collect listed items
         for item in treasury:
             item_id += str(item["item_id"]) + ","
-        await self.bot.say('Items: ' + item_id)
+
+        endpoint_items = "items?ids={0}".format(str(item_id))
+
+        # Call API once for all items
+        try:
+            itemlist = await self.call_api(endpoint_items)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        # Collect amounts
+        for item in treasury:
+            if counter < 20:
+                current = item["count"]
+                item_name = itemlist[counter]["name"]
+                needed = item["needed_by"]["count"]
+
+                data.add_field(name=item_name, value=current+"/"+needed)
+
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException:
+            await self.bot.say("Need permission to embed links")
 
 
     @commands.group(pass_context=True)
