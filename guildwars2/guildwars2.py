@@ -769,8 +769,8 @@ class GuildWars2:
                                 if counter < 20:
                                     data.add_field(
                                         name=member['name'], value=member['rank'])
-                                    counter = counter + 1
-            order_id = order_id + 1
+                                    counter += 1
+            order_id += 1
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
@@ -839,15 +839,14 @@ class GuildWars2:
 
                 if amount != current:
                     data.add_field(name=item_name, value=str(current)+"/"+str(amount), inline=True)
-                    counter = counter + 1
+                    counter += 1
                 amount = 0
-                item_counter = item_counter + 1
+                item_counter += 1
 
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
-
 
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
@@ -894,20 +893,18 @@ class GuildWars2:
 
         multiplier = 0
         rank_id = 0
-        rank_ids = [1,2,3,4,5,6,7,8,9]
-
+        rank_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
         for rank in rank_ids:
             # Get borders for rank ranges
             if multiplier != 0:
-                min = multiplier * 10
-                max = min + 9
+                min_needed = multiplier * 10
+                max_needed = min_needed + 9
             else:
-                min = 0
-                max = 9
-
+                min_needed = 0
+                max_needed = 9
             # Check if players rank is in range
-            if pvprank >= min and pvprank <= max:
+            if min_needed <= pvprank <= max_needed:
                 rank_id = rank
             # If greater than the range it's a dragon
             elif pvprank >= 80:
