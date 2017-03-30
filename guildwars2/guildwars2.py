@@ -825,7 +825,7 @@ class GuildWars2:
             if counter < 20:
                 current = item["count"]
                 item_name = itemlist[counter]["name"]
-                needed = item[2]["upgrade_íd"]
+                needed = item["needed_by"] #["upgrade_íd"]
 
                 data.add_field(name=item_name, value=str(current)+"/"+str(needed))
                 counter = counter + 1
