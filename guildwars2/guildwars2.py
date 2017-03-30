@@ -839,8 +839,8 @@ class GuildWars2:
                 diff = amount - current
                 if diff != 0:
                     data.add_field(name=item_name, value=str(current)+"/"+str(amount), inline=True)
-                    amount = 0
                     counter = counter + 1
+                amount = 0
 
         try:
             await self.bot.say(embed=data)
