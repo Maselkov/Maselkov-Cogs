@@ -712,6 +712,9 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
         guild = guild.replace('%20', ' ')
+        result = str(result).strip("['")
+        result = str(result).strip("']")
+
         await self.bot.say('ID of the guild {0} is: {1}'.format(guild, result))
 
     @guild.command(pass_context=True)
@@ -799,6 +802,8 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
 
+        guild = guild.replace('%20', ' ')
+
         data = discord.Embed(description='Treasury contents of {0}'.format(
             guild.title()), colour=color)
         data.set_author(name=guild.title())
@@ -828,10 +833,9 @@ class GuildWars2:
                 needed = item["needed_by"]
 
                 for need in needed:
-                    amount = 0
                     amount = amount + need["count"]
 
-                data.add_field(name=item_name, value=str(current)+"/"+str(amount))
+                data.add_field(name=item_name, value=str(current)+"/"+str(needed), inline=False)
                 counter = counter + 1
 
         try:
@@ -884,6 +888,7 @@ class GuildWars2:
             rankedwinratio = 0
 
         multiplier = 0
+        rank_id = 0
         rank_ids = [1,2,3,4,5,6,7,8,9]
 
         for rank in rank_ids:
