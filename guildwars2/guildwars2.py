@@ -834,10 +834,10 @@ class GuildWars2:
                 needed = item["needed_by"]
 
                 for need in needed:
-                    for count in need:
-                        test=count
+                    amount = amount + need["count"]
+                amount = 0
 
-                data.add_field(name=item_name, value=str(current)+"/"+str(test), inline=False)
+                data.add_field(name=item_name, value=str(current)+"/"+str(amount), inline=False)
                 counter = counter + 1
 
         try:
