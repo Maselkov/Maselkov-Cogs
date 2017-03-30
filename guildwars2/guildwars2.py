@@ -826,34 +826,12 @@ class GuildWars2:
             else:
                 min = 0
                 max = 9
-            await self.bot.say('Min: ' + str(min) + 'Max: ' + str(max) + 'Rang: ' + str(pvprank))
-
             if pvprank >= min and pvprank <= max:
-                await self.bot.say('HIT Min: ' + str(min) + 'Max: ' + str(max)+ 'Rang: ' + str(pvprank))
                 rank_id = rank
             elif pvprank >= 80:
                 rank_id = rank
             multiplier += 1
 
-        # TODO some better way of doing this
-        # if pvprank <= 9:
-        #     rank_id = 1
-        # elif pvprank <= 19:
-        #     rank_id = 2
-        # elif pvprank <= 29:
-        #     rank_id = 3
-        # elif pvprank <= 39:
-        #     rank_id = 4
-        # elif pvprank <= 49:
-        #     rank_id = 5
-        # elif pvprank <= 59:
-        #     rank_id = 6
-        # elif pvprank <= 69:
-        #     rank_id = 7
-        # elif pvprank <= 79:
-        #     rank_id = 8
-        # elif pvprank >= 80:
-        #     rank_id = 9
         endpoint_ranks = "pvp/ranks/{0}".format(rank_id)
         try:
             rank = await self.call_api(endpoint_ranks)
