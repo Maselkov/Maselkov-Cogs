@@ -828,7 +828,8 @@ class GuildWars2:
 
             if pvprank >= min and pvprank <= max:
                 rank_id = rank
-                
+            multiplier += multiplier
+
         # TODO some better way of doing this
         # if pvprank <= 9:
         #     rank_id = 1
