@@ -827,6 +827,7 @@ class GuildWars2:
             max = ( multiplier + 1 ) * 10 + 9
 
             if pvprank >= min and pvprank <= max:
+                await self.bot.say('Min: ' + min, 'Max: ' + max)
                 rank_id = rank
             multiplier += multiplier
 
