@@ -821,7 +821,7 @@ class GuildWars2:
 
         for rank in rank_ids:
             if multiplier != 0:
-                min = multiplier * 10 +9
+                min = multiplier * 10
                 max = (multiplier + 1) * 10 + 9
             else:
                 min = 0
