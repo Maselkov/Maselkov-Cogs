@@ -826,10 +826,10 @@ class GuildWars2:
             else:
                 min = 0
                 max = 9
-            await self.bot.say('Min: ' + str(min) + 'Max: ' + str(max))
+            await self.bot.say('Min: ' + str(min) + 'Max: ' + str(max) + 'Rang: ' + str(pvprank))
 
             if pvprank >= min and pvprank <= max:
-                await self.bot.say('HIT Min: ' + str(min) + 'Max: ' + str(max))
+                await self.bot.say('HIT Min: ' + str(min) + 'Max: ' + str(max)+ 'Rang: ' + str(pvprank))
                 rank_id = rank
             multiplier += 1
 
