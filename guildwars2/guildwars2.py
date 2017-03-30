@@ -773,6 +773,39 @@ class GuildWars2:
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
 
+    @guild.command(pass_context=True)
+    async def treasury(self, ctx, *, guild: str):
+        """Get list of current and needed items for upgrades
+                Requires key with guilds scope and also Guild Leader permissions ingame"""
+        user = ctx.message.author
+        color = self.getColor(user)
+        guild = guild.replace(' ', '%20')
+        scopes = ["guilds"]
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            endpoint_id = "guild/search?name={0}".format(guild)
+            guild_id = await self.call_api(endpoint_id)
+            guild_id = str(guild_id).strip("['")
+            guild_id = str(guild_id).strip("']")
+            endpoint = "guild/{1}/treasury?access_token={0}".format(
+                key, guild_id)
+            treasury = await self.call_api(endpoint)
+        except APIKeyError as e:
+            await self.bot.say(e)
+            return
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        item_id = ""
+        # Collect listed items
+        for item in treasury:
+            item_id += str(item["item_id"]) + ","
+        await self.bot.say('Items: ' + item_id)
+
+
     @commands.group(pass_context=True)
     async def pvp(self, ctx):
         """PvP related commands.
@@ -826,6 +859,7 @@ class GuildWars2:
             else:
                 min = 0
                 max = 9
+
             if pvprank >= min and pvprank <= max:
                 rank_id = rank
             elif pvprank >= 80:
@@ -1273,6 +1307,7 @@ class GuildWars2:
             await self.bot.say(embed=data)
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
+
 
     async def _gamebuild_checker(self):
         while self is self.bot.get_cog("GuildWars2"):
