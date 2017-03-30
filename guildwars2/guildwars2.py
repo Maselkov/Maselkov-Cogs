@@ -838,8 +838,8 @@ class GuildWars2:
 
                 if amount != current:
                     data.add_field(name=item_name, value=str(current)+"/"+str(amount), inline=True)
+                    counter = counter + 1
                 amount = 0
-                counter = counter + 1
 
         try:
             await self.bot.say(embed=data)
