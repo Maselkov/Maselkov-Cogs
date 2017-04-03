@@ -417,11 +417,11 @@ class GuildWars2:
         for piece in pieces:
             if gear[piece]["id"] is not None:
                 statname = await self._getstatname_(gear[piece]["statname"])
-                itemname = await self._get_item_name_(gear[piece]["id"])
+                itemname = await self._get_item_name_(gear[piece]["id"], ctx)
                 if gear[piece]["upgrades"]:
-                    upgrade = await self._get_item_name_(gear[piece]["upgrades"])
+                    upgrade = await self._get_item_name_(gear[piece]["upgrades"], ctx)
                 if gear[piece]["infusions"]:
-                    infusion = await self._get_item_name_(gear[piece]["infusions"])
+                    infusion = await self._get_item_name_(gear[piece]["infusions"], ctx)
                 if gear[piece]["upgrades"] and not gear[piece]["infusions"]:
                     msg = "{0} {1} with {2}".format(
                         statname, itemname, upgrade)
@@ -1404,9 +1404,11 @@ class GuildWars2:
 
         with open('data/guildwars2/language.json') as langfile:
             data = json.load(langfile)
+        # Direct messages to bot defaults to english
         if server is None:
             language = "en"
         else:
+            # Default value if no language set
             if server.id in data:
                 language = data[server.id]["language"]
             else:
@@ -1467,10 +1469,11 @@ class GuildWars2:
 
         return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
-    async def _get_item_name_(self, items):
+    async def _get_item_name_(self, items, ctx):
+        language = self.getlanguage(ctx)
         name = []
         if isinstance(items, int):
-            endpoint = "items/{0}".format(items)
+            endpoint = "items/{0}?lang={1}".format(items, language)
             try:
                 results = await self.call_api(endpoint)
             except APIError:
@@ -1478,7 +1481,7 @@ class GuildWars2:
             name.append(results["name"])
         else:
             for x in items:
-                endpoint = "items/{0}".format(x)
+                endpoint = "items/{0}?lang={1}".format(x, language)
                 try:
                     results = await self.call_api(endpoint)
                 except APIError:
