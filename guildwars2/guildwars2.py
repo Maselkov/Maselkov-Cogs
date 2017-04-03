@@ -1404,7 +1404,10 @@ class GuildWars2:
 
         with open('data/guildwars2/language.json') as langfile:
             data = json.load(langfile)
-        language = data[server.id]["language"]
+        if server.id in data:
+            language = data[server.id]["language"]
+        else: 
+            language = "en"
         return language
 
 
