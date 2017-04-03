@@ -1405,7 +1405,7 @@ class GuildWars2:
 
         with open('data/guildwars2/language.json') as langfile:
             data = json.load(langfile)
-        language = data[server.id]
+        language = data[server.id]["language"]
         return language
 
 
