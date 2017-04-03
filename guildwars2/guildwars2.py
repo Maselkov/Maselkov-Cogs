@@ -33,6 +33,7 @@ class GuildWars2:
         self.bot = bot
         self.keylist = dataIO.load_json("data/guildwars2/keys.json")
         self.settings = dataIO.load_json("data/guildwars2/settings.json")
+        self.language = dataIO.load_json("data/guildwars2/language.json")
         self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
         self.build = dataIO.load_json("data/guildwars2/build.json")
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
@@ -160,11 +161,14 @@ class GuildWars2:
         """Set the language parameter and store it into settings file"""
 
         user = ctx.message.author
+        server = ctx.message.server
         languages = ["en", "de", "es", "fr", "ko", "zh"]
         if lang in languages:
             await self.bot.say("Language Parameter {0} is valid".format(lang))
+            self.language[server.id] = {"language": lang}
+            dataIO.save_json('data/guildwars2/language.json', self.language)
         else:
-            await self.bot.say("Please use one of the following parameters: en, de, es, fr, ko, zh")
+            await self.bot.say("ERROR: Please use one of the following parameters: en, de, es, fr, ko, zh")
 
     @commands.command(pass_context=True)
     async def account(self, ctx):
@@ -1545,6 +1549,7 @@ def check_files():
     files = {
         "gamedata.json": {},
         "settings.json": {"ENABLED": False},
+        "language.json": {},
         "keys.json": {},
         "build.json": {"id": None}  # Yay legacy support
     }
