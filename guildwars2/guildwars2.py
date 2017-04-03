@@ -164,7 +164,7 @@ class GuildWars2:
         server = ctx.message.server
 
         if server is None:
-            await self.bot.say("This command is not available in DM")
+            await self.bot.say("This command is not available in DM.")
 
         else:
             languages = ["en", "de", "es", "fr", "ko", "zh"]
@@ -599,7 +599,6 @@ class GuildWars2:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
         accountname = self.keylist[user.id]["account_name"]
-        accountname = self.keylist[user.id]["account_name"]
         color = self.getColor(user)
         data = discord.Embed(description="Tokens", colour=color)
         for x in wallet:
@@ -642,7 +641,6 @@ class GuildWars2:
             for curr in results:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
-        accountname = self.keylist[user.id]["account_name"]
         accountname = self.keylist[user.id]["account_name"]
         color = self.getColor(user)
         data = discord.Embed(description="Tokens", colour=color)
