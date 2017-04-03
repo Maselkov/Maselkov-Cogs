@@ -1407,7 +1407,10 @@ class GuildWars2:
         if server is None:
             language = "en"
         else:
-            language = data[server.id]["language"]
+            if server.id in data:
+                language = data[server.id]["language"]
+            else:
+                language = "en"
         return language
 
 
