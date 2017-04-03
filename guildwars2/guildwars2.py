@@ -164,7 +164,7 @@ class GuildWars2:
         server = ctx.message.server
 
         if server is None:
-            await self.bot.say("This command is not available in DM.")
+            await self.bot.say("That command is not available in DMs.")
 
         else:
             languages = ["en", "de", "es", "fr", "ko", "zh"]
@@ -801,6 +801,9 @@ class GuildWars2:
         user = ctx.message.author
         color = self.getColor(user)
         guild = guild.replace(' ', '%20')
+        language = self.getlanguage(ctx)
+        await self.bot.say("Language: " + language)
+
         scopes = ["guilds"]
         try:
             self._check_scopes_(user, scopes)
@@ -1396,6 +1399,15 @@ class GuildWars2:
                 return "{0} silver and {1} copper".format(silver, copper)
         else:
             return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
+
+    def getlanguage(self, ctx):
+        server = ctx.message.server
+
+        with open('data/guildwars2/language.json') as langfile:
+            data = json.load(langfile)
+        language = data[server.id]
+        return language
+
 
     async def getworldid(self, world):
         if world is None:
