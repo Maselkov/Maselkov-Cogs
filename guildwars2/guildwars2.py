@@ -159,8 +159,6 @@ class GuildWars2:
     @commands.command(pass_context=True)
     async def langset(self, ctx, lang):
         """Set the language parameter and store it into settings file"""
-
-        user = ctx.message.author
         server = ctx.message.server
 
         if server is None:
@@ -169,7 +167,7 @@ class GuildWars2:
         else:
             languages = ["en", "de", "es", "fr", "ko", "zh"]
             if lang in languages:
-                await self.bot.say("Language Parameter {0} is valid".format(lang))
+                await self.bot.say("Language for this server set to {0}.".format(lang))
                 self.language[server.id] = {"language": lang}
                 dataIO.save_json('data/guildwars2/language.json', self.language)
             else:
@@ -416,7 +414,7 @@ class GuildWars2:
         data = discord.Embed(description="Gear", colour=color)
         for piece in pieces:
             if gear[piece]["id"] is not None:
-                statname = await self._getstatname_(gear[piece]["statname"])
+                statname = await self._getstatname_(gear[piece]["statname"], ctx)
                 itemname = await self._get_item_name_(gear[piece]["id"], ctx)
                 if gear[piece]["upgrades"]:
                     upgrade = await self._get_item_name_(gear[piece]["upgrades"], ctx)
@@ -1499,8 +1497,9 @@ class GuildWars2:
         name = results["details"]["infix_upgrade"]["id"]
         return name
 
-    async def _getstatname_(self, item):
-        endpoint = "itemstats/{0}".format(item)
+    async def _getstatname_(self, item, ctx):
+        language = self.getlanguage(ctx)
+        endpoint = "itemstats/{0}?lang={1}".format(item, language)
         try:
             results = await self.call_api(endpoint)
         except APIError:
