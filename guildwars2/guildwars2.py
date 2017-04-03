@@ -162,13 +162,18 @@ class GuildWars2:
 
         user = ctx.message.author
         server = ctx.message.server
-        languages = ["en", "de", "es", "fr", "ko", "zh"]
-        if lang in languages:
-            await self.bot.say("Language Parameter {0} is valid".format(lang))
-            self.language[server.id] = {"language": lang}
-            dataIO.save_json('data/guildwars2/language.json', self.language)
+
+        if server is None:
+            await self.bot.say("This command is not available in DM")
+
         else:
-            await self.bot.say("ERROR: Please use one of the following parameters: en, de, es, fr, ko, zh")
+            languages = ["en", "de", "es", "fr", "ko", "zh"]
+            if lang in languages:
+                await self.bot.say("Language Parameter {0} is valid".format(lang))
+                self.language[server.id] = {"language": lang}
+                dataIO.save_json('data/guildwars2/language.json', self.language)
+            else:
+                await self.bot.say("ERROR: Please use one of the following parameters: en, de, es, fr, ko, zh")
 
     @commands.command(pass_context=True)
     async def account(self, ctx):
