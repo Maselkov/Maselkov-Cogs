@@ -315,7 +315,7 @@ class GuildWars2:
         deaths = results["deaths"]
         deathsperhour = round(deaths / (results["age"] / 3600), 1)
         if "title" in results:
-            title = await self._get_title_(results["title"])
+            title = await self._get_title_(results["title"], ctx)
         else:
             title = None
         gender = results["gender"]
@@ -1406,7 +1406,7 @@ class GuildWars2:
             data = json.load(langfile)
         if server.id in data:
             language = data[server.id]["language"]
-        else: 
+        else:
             language = "en"
         return language
 
@@ -1432,8 +1432,9 @@ class GuildWars2:
             return None
         return results
 
-    async def _get_title_(self, tid):
-        endpoint = "titles/{0}".format(tid)
+    async def _get_title_(self, tid, ctx):
+        language = self.getlanguage(ctx)
+        endpoint = "titles/{0}?lang={1}".format(tid,language)
         try:
             results = await self.call_api(endpoint)
         except APIError:
