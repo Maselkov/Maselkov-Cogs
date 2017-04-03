@@ -156,6 +156,17 @@ class GuildWars2:
             await self.bot.say("Need permission to embed links")
 
     @commands.command(pass_context=True)
+    async def langset(self, ctx, lang):
+        """Set the language parameter and store it into settings file"""
+
+        user = ctx.message.author
+        languages = ["en", "de", "es", "fr", "ko", "zh"]
+        if lang in languages:
+            await self.bot.say("Language Parameter {0} is valid".format(lang))
+        else:
+            await self.bot.say("Please use one of the following parameters: en, de, es, fr, ko, zh")
+
+    @commands.command(pass_context=True)
     async def account(self, ctx):
         """Information about your account
         Requires a key with account scope
