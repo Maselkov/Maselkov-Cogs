@@ -33,6 +33,7 @@ class GuildWars2:
         self.bot = bot
         self.keylist = dataIO.load_json("data/guildwars2/keys.json")
         self.settings = dataIO.load_json("data/guildwars2/settings.json")
+        self.language = dataIO.load_json("data/guildwars2/language.json")
         self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
         self.build = dataIO.load_json("data/guildwars2/build.json")
         self.session = aiohttp.ClientSession(loop=self.bot.loop)
@@ -154,6 +155,23 @@ class GuildWars2:
             await self.bot.say(embed=data)
         except discord.HTTPException:
             await self.bot.say("Need permission to embed links")
+
+    @commands.command(pass_context=True)
+    async def langset(self, ctx, lang):
+        """Set the language parameter and store it into settings file"""
+        server = ctx.message.server
+
+        if server is None:
+            await self.bot.say("That command is not available in DMs.")
+
+        else:
+            languages = ["en", "de", "es", "fr", "ko", "zh"]
+            if lang in languages:
+                await self.bot.say("Language for this server set to {0}.".format(lang))
+                self.language[server.id] = {"language": lang}
+                dataIO.save_json('data/guildwars2/language.json', self.language)
+            else:
+                await self.bot.say("ERROR: Please use one of the following parameters: en, de, es, fr, ko, zh")
 
     @commands.command(pass_context=True)
     async def account(self, ctx):
@@ -295,7 +313,7 @@ class GuildWars2:
         deaths = results["deaths"]
         deathsperhour = round(deaths / (results["age"] / 3600), 1)
         if "title" in results:
-            title = await self._get_title_(results["title"])
+            title = await self._get_title_(results["title"], ctx)
         else:
             title = None
         gender = results["gender"]
@@ -396,12 +414,12 @@ class GuildWars2:
         data = discord.Embed(description="Gear", colour=color)
         for piece in pieces:
             if gear[piece]["id"] is not None:
-                statname = await self._getstatname_(gear[piece]["statname"])
-                itemname = await self._get_item_name_(gear[piece]["id"])
+                statname = await self._getstatname_(gear[piece]["statname"], ctx)
+                itemname = await self._get_item_name_(gear[piece]["id"], ctx)
                 if gear[piece]["upgrades"]:
-                    upgrade = await self._get_item_name_(gear[piece]["upgrades"])
+                    upgrade = await self._get_item_name_(gear[piece]["upgrades"], ctx)
                 if gear[piece]["infusions"]:
-                    infusion = await self._get_item_name_(gear[piece]["infusions"])
+                    infusion = await self._get_item_name_(gear[piece]["infusions"], ctx)
                 if gear[piece]["upgrades"] and not gear[piece]["infusions"]:
                     msg = "{0} {1} with {2}".format(
                         statname, itemname, upgrade)
@@ -579,7 +597,6 @@ class GuildWars2:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
         accountname = self.keylist[user.id]["account_name"]
-        accountname = self.keylist[user.id]["account_name"]
         color = self.getColor(user)
         data = discord.Embed(description="Tokens", colour=color)
         for x in wallet:
@@ -622,7 +639,6 @@ class GuildWars2:
             for curr in results:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
-        accountname = self.keylist[user.id]["account_name"]
         accountname = self.keylist[user.id]["account_name"]
         color = self.getColor(user)
         data = discord.Embed(description="Tokens", colour=color)
@@ -783,6 +799,8 @@ class GuildWars2:
         user = ctx.message.author
         color = self.getColor(user)
         guild = guild.replace(' ', '%20')
+        language = self.getlanguage(ctx)
+
         scopes = ["guilds"]
         try:
             self._check_scopes_(user, scopes)
@@ -817,7 +835,7 @@ class GuildWars2:
         for item in treasury:
             item_id += str(item["item_id"]) + ","
 
-        endpoint_items = "items?ids={0}".format(str(item_id))
+        endpoint_items = "items?ids={0}&lang={1}".format(str(item_id),language)
 
         # Call API once for all items
         try:
@@ -1379,6 +1397,23 @@ class GuildWars2:
         else:
             return "{0} gold, {1} silver and {2} copper".format(gold, silver, copper)
 
+    def getlanguage(self, ctx):
+        server = ctx.message.server
+
+        with open('data/guildwars2/language.json') as langfile:
+            data = json.load(langfile)
+        # Direct messages to bot defaults to english
+        if server is None:
+            language = "en"
+        else:
+            # Default value if no language set
+            if server.id in data:
+                language = data[server.id]["language"]
+            else:
+                language = "en"
+        return language
+
+
     async def getworldid(self, world):
         if world is None:
             return None
@@ -1400,8 +1435,9 @@ class GuildWars2:
             return None
         return results
 
-    async def _get_title_(self, tid):
-        endpoint = "titles/{0}".format(tid)
+    async def _get_title_(self, tid, ctx):
+        language = self.getlanguage(ctx)
+        endpoint = "titles/{0}?lang={1}".format(tid,language)
         try:
             results = await self.call_api(endpoint)
         except APIError:
@@ -1431,10 +1467,11 @@ class GuildWars2:
 
         return fmt.format(d=days, h=hours, m=minutes, s=seconds)
 
-    async def _get_item_name_(self, items):
+    async def _get_item_name_(self, items, ctx):
+        language = self.getlanguage(ctx)
         name = []
         if isinstance(items, int):
-            endpoint = "items/{0}".format(items)
+            endpoint = "items/{0}?lang={1}".format(items, language)
             try:
                 results = await self.call_api(endpoint)
             except APIError:
@@ -1442,7 +1479,7 @@ class GuildWars2:
             name.append(results["name"])
         else:
             for x in items:
-                endpoint = "items/{0}".format(x)
+                endpoint = "items/{0}?lang={1}".format(x, language)
                 try:
                     results = await self.call_api(endpoint)
                 except APIError:
@@ -1460,8 +1497,9 @@ class GuildWars2:
         name = results["details"]["infix_upgrade"]["id"]
         return name
 
-    async def _getstatname_(self, item):
-        endpoint = "itemstats/{0}".format(item)
+    async def _getstatname_(self, item, ctx):
+        language = self.getlanguage(ctx)
+        endpoint = "itemstats/{0}?lang={1}".format(item, language)
         try:
             results = await self.call_api(endpoint)
         except APIError:
@@ -1534,6 +1572,7 @@ def check_files():
     files = {
         "gamedata.json": {},
         "settings.json": {"ENABLED": False},
+        "language.json": {},
         "keys.json": {},
         "build.json": {"id": None}  # Yay legacy support
     }
