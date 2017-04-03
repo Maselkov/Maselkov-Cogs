@@ -837,7 +837,7 @@ class GuildWars2:
         for item in treasury:
             item_id += str(item["item_id"]) + ","
 
-        endpoint_items = "items?ids={0}?lang={1}".format(str(item_id),language)
+        endpoint_items = "items?ids={0}&lang={1}".format(str(item_id),language)
 
         # Call API once for all items
         try:
