@@ -802,7 +802,6 @@ class GuildWars2:
         color = self.getColor(user)
         guild = guild.replace(' ', '%20')
         language = self.getlanguage(ctx)
-        await self.bot.say("Language: " + language)
 
         scopes = ["guilds"]
         try:
@@ -838,7 +837,7 @@ class GuildWars2:
         for item in treasury:
             item_id += str(item["item_id"]) + ","
 
-        endpoint_items = "items?ids={0}".format(str(item_id))
+        endpoint_items = "items?ids={0}?lang={1}".format(str(item_id),language)
 
         # Call API once for all items
         try:
