@@ -319,6 +319,7 @@ class GuildWars2:
         gender = results["gender"]
         profession = results["profession"]
         race = results["race"]
+        guild = results["guild"]
         color = self.gamedata["professions"][profession.lower()]["color"]
         color = int(color, 0)
         icon = self.gamedata["professions"][profession.lower()]["icon"]
@@ -326,13 +327,13 @@ class GuildWars2:
         data.set_thumbnail(url=icon)
         data.add_field(name="Created at", value=created)
         data.add_field(name="Played for", value=age)
-        if "guild" in results:
+        if guild is not None:
             guild = await self._get_guild_(results["guild"])
             gname = guild["name"]
             gtag = guild["tag"]
             data.add_field(name="Guild", value="[{0}] {1}".format(gtag, gname))
         data.add_field(name="Deaths", value=deaths)
-        data.add_field(name="Deaths per hour", value=deathsperhour)
+        data.add_field(name="Deaths per hour", value=str(deathsperhour))
         data.set_author(name=character)
         data.set_footer(text="A {0} {1} {2}".format(
             gender.lower(), race.lower(), profession.lower()))
