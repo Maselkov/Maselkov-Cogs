@@ -1324,8 +1324,8 @@ class GuildWars2:
             try:
                 self._check_scopes_(user, scopes)
                 key = self.keylist[user.id]["key"]
-                endpoint = "commerce/transactions/current/{1}?access_token={0}".format(
-                    key, state)
+                accountname = self.keylist[user.id]["account_name"]
+                endpoint = "commerce/transactions/current/{1}?access_token={0}".format(key, state)
                 results = await self.call_api(endpoint)
             except APIKeyError as e:
                 await self.bot.say(e)
@@ -1337,8 +1337,9 @@ class GuildWars2:
         else:
             await self.bot.say("{0.mention}, Please us either 'sells' or 'buys' as parameter".format(user))
             return
+
         data = discord.Embed(description='Current ' + state, colour=color)
-        data.set_author(name='Overview of your transactions')
+        data.set_author(name='Transaction overview of {0}'.format(accountname))
         data.set_thumbnail(
             url="https://wiki.guildwars2.com/images/thumb/d/df/Black-Lion-Logo.png/300px-Black-Lion-Logo.png")
         data.set_footer(text="Black Lion Trading Company")
