@@ -1342,34 +1342,36 @@ class GuildWars2:
         data.set_thumbnail(
             url="https://wiki.guildwars2.com/images/thumb/d/df/Black-Lion-Logo.png/300px-Black-Lion-Logo.png")
         data.set_footer(text="Black Lion Trading Company")
-        counter = 0
+
+        results = results[:20] # Only display 20 most recent transactions
         item_id = ""
+        dup_item = {}
         # Collect listed items
         for result in results:
             item_id += str(result["item_id"]) + ","
+            if result["item_id"] not in dup_item:
+                dup_item[result["item_id"]] = len(dup_item)
         # Get information about all items, doesn't matter if string ends with ,
         endpoint_items = "items?ids={0}".format(str(item_id))
         endpoint_listing = "commerce/listings?ids={0}".format(str(item_id))
         # Call API once for all items
         try:
-            listings = await self.call_api(endpoint_listing)
             itemlist = await self.call_api(endpoint_items)
+            listings = await self.call_api(endpoint_listing)
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
         for result in results:
-            # Only display first 20 transactions
-            if counter < 20:
-                # Store data about transaction
-                quantity = result["quantity"]
-                price = result["price"]
-                item_name = itemlist[counter]["name"]
-                offers = listings[counter][state]
-                max_price = offers[0]["unit_price"]
-                data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(
-                    price) + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
-                counter += 1
+            # Store data about transaction
+            index = dup_item[result["item_id"]]
+            quantity = result["quantity"]
+            price = result["price"]
+            item_name = itemlist[index]["name"]
+            offers = listings[index][state]
+            max_price = offers[0]["unit_price"]
+            data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price)
+                + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
