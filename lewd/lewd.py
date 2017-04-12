@@ -38,7 +38,7 @@ class Lewd:
             search = "random"
         try:
             searchr = search.replace(" ", "%20")
-            if self.filter[server.id]:
+            if server.id in self.filter:
                 for tag in self.filter[server.id]:
                     searchr += "%20-" + tag
             async with self.session.get("https://e621.net/post/index.json?limit=150&tags={0}".format(searchr)) as r:
