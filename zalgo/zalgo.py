@@ -145,7 +145,10 @@ class Zalgo:
         else:
             settings = default_settings
         zalgo_text = self._zalgo_(text, settings)
-        await self.bot.say(zalgo_text)
+        try:
+            await self.bot.say(zalgo_text)
+        except:
+            await self.bot.say("This message is too long")
 
     def _zalgo_(self, text: str, settings):
         output = ""
