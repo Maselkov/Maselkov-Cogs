@@ -63,7 +63,7 @@ class Lewd:
         try:
             results = []
             searchr = search.replace(" ", "%20")
-            if self.filter[server.id]:
+            if server.id in self.filter:
                 for tag in self.filter[server.id]:
                     searchr += "%20-" + tag
             async with self.session.get("https://rule34.xxx/index.php?page=dapi&s=post&q=index&tags={0}".format(searchr)) as r:
