@@ -194,16 +194,11 @@ class GuildWars2:
             return
         accountname = self.keylist[user.id]["account_name"]
         created = results["created"].split("T", 1)[0]
-        hascommander = results["commander"]
-        if hascommander:
-            hascommander = "Yes"
-        else:
-            hascommander = "No"
+        hascommander = "Yes" if results["commander"] else "No"
         color = self.getColor(user)
         data = discord.Embed(description=None, colour=color)
         data.add_field(name="Created account on", value=created)
-        data.add_field(name="Has commander tag",
-                       value=hascommander, inline=False)
+        data.add_field(name="Has commander tag", value=hascommander, inline=False)
         if "fractal_level" in results:
             fractallevel = results["fractal_level"]
             data.add_field(name="Fractal level", value=fractallevel)
@@ -237,12 +232,12 @@ class GuildWars2:
         try:
             self._check_scopes_(user, scopes)
             key = self.keylist[user.id]["key"]
-            endpoint = "account/bank?access_token={0}".format(key)
-            endpoint_ = "characters?access_token={0}".format(key)
-            endpoint__ = "account/inventory?access_token={0}".format(key)
-            results = await self.call_api(endpoint)
-            characters = await self.call_api(endpoint_)
-            shared = await self.call_api(endpoint__)
+            endpoint_bank = "account/bank?access_token={0}".format(key)
+            endpoint_shared = "account/inventory?access_token={0}".format(key)
+            endpoint_char = "characters?access_token={0}".format(key)
+            bank = await self.call_api(endpoint_bank)
+            shared = await self.call_api(endpoint_shared)
+            characters = await self.call_api(endpoint_char)
         except APIKeyError as e:
             await self.bot.say(e)
             return
@@ -250,15 +245,11 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        li = 0
-        results = [e for e in results if e != None]
-        shared = [e for e in shared if e != None]
-        for x in results:
-            if x["id"] == 77302:
-                li += x["count"]
-        for x in shared:
-            if x["id"] == 77302:
-                li += x["count"]
+
+        bank = [item["count"] for item in bank if item != None and item["id"] == 77302]
+        shared = [item["count"] for item in shared if item != None and item["id"] == 77302]
+        li = sum(bank) + sum(shared)
+
         for character in characters:
             endpoint = "characters/{0}?access_token={1}".format(character, key)
             try:
@@ -267,14 +258,10 @@ class GuildWars2:
                 await self.bot.say("{0.mention}, API has responded with the following error: "
                                    "`{1}`".format(user, e))
                 return
-            bags = char["bags"]
-            bags = [e for e in bags if e != None]
+            bags = [bag for bag in char["bags"] if bag != None]
             for bag in bags:
-                inv = bag["inventory"]
-                inv = [e for e in inv if e != None]
-                for item in inv:
-                    if item["id"] == 77302:
-                        li += item["count"]
+                inv = [item["count"] for item in bag["inventory"] if item != None and item["id"] == 77302]
+                li += sum(inv)
         await self.bot.edit_message(msg, "{0.mention}, you have {1} legendary insights".format(user, li))
 
     @commands.group(pass_context=True)
@@ -460,9 +447,7 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        currlist = []
-        for currency in results:
-            currlist.append(currency["name"])
+        currlist = [currency["name"] for currency in results]
         output = "Available currencies are: ```"
         output += ", ".join(currlist) + "```"
         await self.bot.say(output)
@@ -500,9 +485,8 @@ class GuildWars2:
             for item in wallet:
                 if item["id"] == 1 and cid == 1:
                     count = self.gold_to_coins(item["value"])
-                else:
-                    if item["id"] == cid:
-                        count = item["value"]
+                elif item["id"] == cid:
+                    count = item["value"]
             data.add_field(name="Count", value=count, inline=False)
         except:
             pass
@@ -913,26 +897,7 @@ class GuildWars2:
         else:
             rankedwinratio = 0
 
-        multiplier = 0
-        rank_id = 0
-        rank_ids = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-        for rank in rank_ids:
-            # Get borders for rank ranges
-            if multiplier != 0:
-                min_needed = multiplier * 10
-                max_needed = min_needed + 9
-            else:
-                min_needed = 0
-                max_needed = 9
-            # Check if players rank is in range
-            if min_needed <= pvprank <= max_needed:
-                rank_id = rank
-            # If greater than the range it's a dragon
-            elif pvprank >= 80:
-                rank_id = rank
-            multiplier += 1
-
+        rank_id = results["pvp_rank"] // 10 + 1
         endpoint_ranks = "pvp/ranks/{0}".format(rank_id)
         try:
             rank = await self.call_api(endpoint_ranks)
