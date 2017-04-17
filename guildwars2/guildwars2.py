@@ -1349,10 +1349,13 @@ class GuildWars2:
             if self.settings["ENABLED"]:
                 if await self.update_build():
                     channels = self.get_channels()
-                    for channel in channels:
-                        await self.bot.send_message(self.bot.get_channel(channel),
-                                                    "@here Guild Wars 2 has just updated! New build: "
-                                                    "`{0}`".format(self.build["id"]))
+                    if channels:
+                        for channel in channels:
+                            await self.bot.send_message(self.bot.get_channel(channel),
+                                                        "@here Guild Wars 2 has just updated! New build: "
+                                                        "`{0}`".format(self.build["id"]))
+                    else:
+                        print ("A new build was found, but no channels to notify were found. Maybe error?")
             await asyncio.sleep(60)
 
     def gold_to_coins(self, money):
@@ -1487,16 +1490,17 @@ class GuildWars2:
         try:
             channels = []
             for server in self.settings:
-                if self.settings[server]["ON"]:
-                    channels.append(self.settings[server]["CHANNEL"])
+                if not server == "ENABLED": #Ugly I know
+                    if self.settings[server]["ON"]:
+                        channels.append(self.settings[server]["CHANNEL"])
             return channels
         except:
-            return channels
+            return None
 
     def get_announcement_channel(self, server):
         try:
             return server.get_channel(self.settings[server.id]["CHANNEL"])
-        except Exception:
+        except:
             return None
 
     async def update_build(self):
