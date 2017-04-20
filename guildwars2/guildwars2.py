@@ -10,6 +10,7 @@ import os
 import asyncio
 import aiohttp
 import datetime
+from pymongo import MongoClient
 
 try:
     from bs4 import BeautifulSoup
@@ -31,7 +32,8 @@ class GuildWars2:
 
     def __init__(self, bot):
         self.bot = bot
-        self.keylist = dataIO.load_json("data/guildwars2/keys.json")
+        self.client = MongoClient()
+        self.db = self.client['gw2']
         self.settings = dataIO.load_json("data/guildwars2/settings.json")
         self.language = dataIO.load_json("data/guildwars2/language.json")
         self.gamedata = dataIO.load_json("data/guildwars2/gamedata.json")
@@ -60,7 +62,7 @@ class GuildWars2:
             output = "Your message was removed for privacy"
         else:
             output = "I would've removed your message as well, but I don't have the neccesary permissions..."
-        if user.id in self.keylist:
+        if self.fetch_key(user):
             await self.bot.say("{0.mention}, you're already on the list, "
                                "remove your key first if you wish to change it. {1}".format(user, output))
             return
@@ -80,19 +82,19 @@ class GuildWars2:
         name = results["name"]
         if not name:
             name = None  # Else embed fails
-        self.keylist[user.id] = {
-            "key": key, "account_name": acc["name"], "name": name, "permissions": results["permissions"]}
+        keydoc = {
+            "key": key, "user": user.id, "account_name": acc["name"], "name": name, "permissions": results["permissions"]}
         await self.bot.say("{0.mention}, your api key was verified and "
                            "added to the list. {1}".format(user, output))
-        self.save_keys()
+        self.db.keys.insert_one(keydoc)
 
     @key.command(pass_context=True)
     async def remove(self, ctx):
         """Removes your key from the list"""
         user = ctx.message.author
-        if user.id in self.keylist:
-            self.keylist.pop(user.id)
-            self.save_keys()
+        keydoc = self.fetch_key(user)
+        if keydoc:
+            self.db.keys.delete_one({"user": user.id})
             await self.bot.say("{0.mention}, sucessfuly removed your key. "
                                "You may input a new one.".format(user))
         else:
@@ -102,25 +104,26 @@ class GuildWars2:
     @checks.is_owner()
     async def clear(self):
         """Purges the key list"""
-        self.keylist = {}
-        self.save_keys()
+        self.db.keys.drop()
         await self.bot.say("Key list is now empty.")
 
-    @key.command(name='list', hidden=True)
-    @checks.is_owner()
-    async def _list(self):
-        """Lists all keys and users"""
-        if not self.keylist:
-            await self.bot.say("Keylist is empty!")
-        else:
-            msg = await self.bot.say("Calculating...")
-            readablekeys = {}
-            for key, value in self.keylist.items():
-                user = await self.bot.get_user_info(key)
-                name = user.name
-                readablekeys[name] = value
-            await self.bot.edit_message(msg,
-                                        "```{0}```".format(json.dumps(readablekeys, indent=2)))
+
+    # TODO too much work to convert it for now
+    #@key.command(name='list', hidden=True)
+    #@checks.is_owner()
+    #async def _list(self):
+    #    """Lists all keys and users"""
+    #    if not self.keylist:
+    #        await self.bot.say("Keylist is empty!")
+    #    else:
+    #        msg = await self.bot.say("Calculating...")
+    #        readablekeys = {}
+    #        for key, value in self.keylist.items():
+    #            user = await self.bot.get_user_info(key)
+    #            name = user.name
+    #            readablekeys[name] = value
+    #        await self.bot.edit_message(msg,
+    #                                    "```{0}```".format(json.dumps(readablekeys, indent=2)))
 
     @key.command(pass_context=True)
     async def info(self, ctx):
@@ -129,9 +132,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = []
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "account/?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -142,8 +146,8 @@ class GuildWars2:
                                "`{1}`".format(user, e))
             return
         accountname = results["name"]
-        keyname = self.keylist[user.id]["name"]
-        permissions = self.keylist[user.id]["permissions"]
+        keyname = keydoc["name"]
+        permissions = keydoc["permissions"]
         permissions = ', '.join(permissions)
         color = self.getColor(user)
         data = discord.Embed(description=None, colour=color)
@@ -180,9 +184,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["account"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "account/?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -192,7 +197,7 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        accountname = self.keylist[user.id]["account_name"]
+        accountname = keydoc["account_name"]
         created = results["created"].split("T", 1)[0]
         hascommander = "Yes" if results["commander"] else "No"
         color = self.getColor(user)
@@ -205,7 +210,7 @@ class GuildWars2:
         if "wvw_rank" in results:
             wvwrank = results["wvw_rank"]
             data.add_field(name="WvW rank", value=wvwrank)
-        if "pvp" in self.keylist[user.id]["permissions"]:
+        if "pvp" in keydoc["permissions"]:
             endpoint = "pvp/stats?access_token={0}".format(key)
             try:
                 pvp = await self.call_api(endpoint)
@@ -228,10 +233,11 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["inventories", "characters"]
+        keydoc = self.fetch_key(user)
         msg = await self.bot.say("Getting legendary insights, this might take a while...")
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint_bank = "account/bank?access_token={0}".format(key)
             endpoint_shared = "account/inventory?access_token={0}".format(key)
             endpoint_char = "characters?access_token={0}".format(key)
@@ -282,9 +288,10 @@ class GuildWars2:
         user = ctx.message.author
         character = character.title()
         character.replace(" ", "%20")
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "characters/{0}?access_token={1}".format(character, key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -294,7 +301,7 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        accountname = self.keylist[user.id]["account_name"]
+        accountname = keydoc["account_name"]
         age = self.get_age(results["age"])
         created = results["created"].split("T", 1)[0]
         deaths = results["deaths"]
@@ -336,9 +343,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["characters"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "characters/?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -364,9 +372,10 @@ class GuildWars2:
         scopes = ["characters"]
         character = character.title()
         character.replace(" ", "%20")
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "characters/{0}?access_token={1}".format(character, key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -375,6 +384,7 @@ class GuildWars2:
         except APIError as e:
             await self.bot.say("{0.mention}, invalid character name".format(user))
             return
+        await self.bot.say("Getting gear, this might take a while...")
         eq = results["equipment"]
         gear = {}
         pieces = ["Helm", "Shoulders", "Coat", "Gloves", "Leggings", "Boots", "Ring1", "Ring2", "Amulet",
@@ -477,9 +487,10 @@ class GuildWars2:
         color = self.getColor(user)
         data = discord.Embed(description="Currency", colour=color)
         scopes = ["wallet"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "account/wallet?access_token={0}".format(key)
             wallet = await self.call_api(endpoint)
             for item in wallet:
@@ -505,9 +516,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["wallet"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "account/wallet?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -530,7 +542,7 @@ class GuildWars2:
             for curr in results:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
-        accountname = self.keylist[user.id]["account_name"]
+        accountname = keydoc["account_name"]
         color = self.getColor(user)
         data = discord.Embed(description="Wallet", colour=color)
         for x in wallet:
@@ -554,9 +566,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["wallet"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "account/wallet?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -581,7 +594,7 @@ class GuildWars2:
             for curr in results:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
-        accountname = self.keylist[user.id]["account_name"]
+        accountname = keydoc["account_name"]
         color = self.getColor(user)
         data = discord.Embed(description="Tokens", colour=color)
         for x in wallet:
@@ -602,9 +615,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["wallet"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "account/wallet?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -624,7 +638,7 @@ class GuildWars2:
             for curr in results:
                 if curr["id"] == x["id"]:
                     x["count"] = curr["value"]
-        accountname = self.keylist[user.id]["account_name"]
+        accountname = keydoc["account_name"]
         color = self.getColor(user)
         data = discord.Embed(description="Tokens", colour=color)
         for x in wallet:
@@ -653,9 +667,10 @@ class GuildWars2:
         color = self.getColor(user)
         guild = guild.replace(' ', '%20')
         scopes = ["guilds"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint_id = "guild/search?name={0}".format(guild)
             guild_id = await self.call_api(endpoint_id)
             guild_id = str(guild_id).strip("['")
@@ -726,9 +741,10 @@ class GuildWars2:
         color = self.getColor(user)
         guild = guild.replace(' ', '%20')
         scopes = ["guilds"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint_id = "guild/search?name={0}".format(guild)
             guild_id = await self.call_api(endpoint_id)
             guild_id = str(guild_id).strip("['")
@@ -785,11 +801,11 @@ class GuildWars2:
         color = self.getColor(user)
         guild = guild.replace(' ', '%20')
         language = self.getlanguage(ctx)
-
         scopes = ["guilds"]
+        keydoc = self.fetcH_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint_id = "guild/search?name={0}".format(guild)
             guild_id = await self.call_api(endpoint_id)
             guild_id = str(guild_id).strip("['")
@@ -869,9 +885,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["pvp"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "pvp/stats?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -881,7 +898,7 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        accountname = self.keylist[user.id]["account_name"]
+        accountname = keydoc["account_name"]
         pvprank = results["pvp_rank"] + results["pvp_rank_rollovers"]
         totalgamesplayed = sum(results["aggregate"].values())
         totalwins = results["aggregate"]["wins"] + results["aggregate"]["byes"]
@@ -933,9 +950,10 @@ class GuildWars2:
         user = ctx.message.author
         professionsformat = {}
         scopes = ["pvp"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "pvp/stats?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -945,7 +963,7 @@ class GuildWars2:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        accountname = self.keylist[user.id]["account_name"]
+        accountname = keydoc["account_name"]
         professions = self.gamedata["professions"].keys()
         if not profession:
             for profession in professions:
@@ -1018,9 +1036,10 @@ class GuildWars2:
         """
         user = ctx.message.author
         scopes = ["progression"]
+        keydoc = self.fetch_key(user)
         try:
             self._check_scopes_(user, scopes)
-            key = self.keylist[user.id]["key"]
+            key = keydoc["key"]
             endpoint = "account/raids/?access_token={0}".format(key)
             results = await self.call_api(endpoint)
         except APIKeyError as e:
@@ -1078,9 +1097,10 @@ class GuildWars2:
         """Info about a world. If none is provided, defaults to account's world
         """
         user = ctx.message.author
-        if not world and user.id in self.keylist:
+        keydoc = self.fetch_key(user)
+        if not world and keydoc:
             try:
-                key = self.keylist[user.id]["key"]
+                key = keydoc["key"]
                 endpoint = "account/?access_token={0}".format(key)
                 results = await self.call_api(endpoint)
                 wid = results["world"]
@@ -1285,11 +1305,12 @@ class GuildWars2:
         color = self.getColor(user)
         state = buys_sells.lower()
         scopes = ["tradingpost"]
+        keydoc = self.fetch_key(user)
         if state == "buys" or state == "sells":
             try:
                 self._check_scopes_(user, scopes)
-                key = self.keylist[user.id]["key"]
-                accountname = self.keylist[user.id]["account_name"]
+                key = keydoc["key"]
+                accountname = keydoc["account_name"]
                 endpoint = "commerce/transactions/current/{1}?access_token={0}".format(key, state)
                 results = await self.call_api(endpoint)
             except APIKeyError as e:
@@ -1518,21 +1539,23 @@ class GuildWars2:
             return False
 
     def _check_scopes_(self, user, scopes):
-        if user.id not in self.keylist:
+        keydoc = self.fetch_key(user)
+        if not keydoc:
             raise APIKeyError(
                 "No API key associated with {0.mention}".format(user))
         if scopes:
             missing = []
             for scope in scopes:
-                if scope not in self.keylist[user.id]["permissions"]:
+                if scope not in keydoc["permissions"]:
                     missing.append(scope)
             if missing:
                 missing = ", ".join(missing)
                 raise APIKeyError(
                     "{0.mention}, missing the following scopes to use this command: `{1}`".format(user, missing))
 
-    def save_keys(self):
-        dataIO.save_json('data/guildwars2/keys.json', self.keylist)
+
+    def fetch_key(self, user):
+        return self.db.keys.find_one({"user": user.id})
 
 
 def check_folders():
@@ -1546,7 +1569,6 @@ def check_files():
         "gamedata.json": {},
         "settings.json": {"ENABLED": False},
         "language.json": {},
-        "keys.json": {},
         "build.json": {"id": None}  # Yay legacy support
     }
 
