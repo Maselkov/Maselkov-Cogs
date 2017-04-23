@@ -1,0 +1,9 @@
+{
+    "AUTHOR" : "Maselkov",
+    "SHORT" : "Notifications for when someone changes their name!",
+    "DESCRIPTION" : "Notifications for when someone changes their name. Simple cog made on request.",
+    "DISABLED" : false,
+    "NAME" : "namechange",
+    "TAGS" : [""],
+    "INSTALL_MSG" : "Set settings using [p]namechangeset"
+}
