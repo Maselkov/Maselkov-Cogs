@@ -9,7 +9,7 @@ import os
 
 
 default_settings = {"mode": "DM", "rules": None, "kick_message": "Too bad", "on": False,
-                    "role_before": None, "role_after": None, "welcome_message": "Enjoy your stay"}
+                    "role_before": None, "role_after": None, "welcome_message": "Enjoy your stay", "logchannel": None, "timeout_message": "You took too long to respond. You may rejoin"}
 
 
 class Bouncer:
@@ -88,6 +88,34 @@ class Bouncer:
         await self.bot.say("Kick message set to: {0}".format(message))
         dataIO.save_json('data/bouncer/settings.json', self.settings)
 
+
+    @bouncerset.command(pass_context=True, name="timeoutmessage")
+    async def bouncerset_timeoutmessage(self, ctx, *, message: str):
+        """This message will be delivered to people who don't react either way for 5 minutes
+        Should probably include a tutorial on how to use it, and maybe invite link back to the server.
+        """
+        server = ctx.message.server
+        self.settings[server.id]["timeout_message"] = message
+        await self.bot.say("Timeout message set to: {0}".format(message))
+        dataIO.save_json('data/bouncer/settings.json', self.settings)
+
+
+    @bouncerset.command(pass_context=True, name="logchannel")
+    async def bouncerset_logchannel(self, ctx, channel : discord.Channel=None):
+        """A channel to send messages to whenever some error occurs, user
+        agress/disagress with the rules or times out
+        This is to ensure bot doesn't lock anybody out.
+        """
+        server = ctx.message.server
+        if not server.me.permissions_in(channel).send_messages:
+            await self.bot.say("No permissions to speak in that channel")
+            return
+        self.settings[server.id]["logchannel"] = channel.id
+        dataIO.save_json('data/bouncer/settings.json', self.settings)
+        await self.bot.send_message(channel, "I will now send bouncer logs here.")
+
+
+
     @bouncerset.command(pass_context=True, name="roles")
     async def bouncerset_roles(self, ctx, before_after: str, role: discord.Role=None):
         """For first parameter use before or after. For roles with space with them, use \"double quotes\"
@@ -129,11 +157,23 @@ class Bouncer:
             elif result.reaction.emoji == "❌":
                 return False
         except Exception as e:
-            print("Tried to send message to {} but failed. Probably DMs diasbled. Error: {}".format(
+            print("[Bouncer] Tried to send message to {} but failed. Probably DMs diasbled. Error: {}".format(
                 target, e))
+
+    async def writelog(self, server, message):
+        log_channel = self.settings[server.id]["logchannel"]
+        if not log_channel:
+            return
+        channel = server.get_channel(log_channel)
+        try:
+            await self.bot.send_message(channel, message)
+        except:
+            print("Even writing logs failed. God help you.")
+
 
     async def on_member_join(self, member):
         server = member.server
+        channel = server.default_channel
         if member.bot:  # BotRights
             return
         if server.id not in self.settings:
@@ -142,6 +182,20 @@ class Bouncer:
         settings = self.settings[server.id]
         if not settings["on"]:
             return
+        perms = channel.permissions_for(server.me)
+        manage_channels = perms.manage_channels
+        add_reactions = perms.add_reactions
+        kick_members = perms.kick_members
+        manage_roles = perms.manage_roles
+        read_messages = perms.read_messages
+        send_messages = perms.send_messages
+        can_proceed = manage_channels and add_reactions and kick_members and manage_roles and read_messages and send_messages
+        if not can_proceed:
+            error = ("Permission missing. Neccesary permissions: Manage channels, "
+                     "add reactions, kick members, manage roles, read messages, send messages")
+            print (error)
+            await self.writelog(server, error)
+            return
         mode = settings["mode"]
         role_before = discord.utils.get(
             server.roles, id=settings["role_before"]) if settings["role_before"] else None
@@ -149,6 +203,17 @@ class Bouncer:
         rules = settings["rules"]
         welcome_message = settings["welcome_message"]
         kick_message = settings["kick_message"]
+        timeout_message = settings["timeout_message"]
+        if not role_after:
+            error = "After-role is not set, aborting"
+            print (error)
+            await self.writelog(server, error)
+            return
+        if not kick_message or not welcome_message:
+            error = "Missing message in settings, aborting"
+            print (error)
+            await self.writelog(server, error)
+            return
         if role_before:
             await self.bot.add_roles(member, role_before)
         try:
@@ -159,43 +224,53 @@ class Bouncer:
                     if role_before:
                         await self.bot.remove_roles(member, role_before)
                     await self.bot.add_roles(member, role_after)
+                    await self.writelog(server, "{0.name} has accepted the rules".format(member))
                 if not result and result is not None:
                     await self.bot.send_message(member, kick_message)
                     await self.bot.kick(member)
+                    await self.writelog(server, "{0.name} has denied the rules and been kicked".format(member))
                 elif result is None:
-                    await self.bot.send_message(member, "You took too long to respond. You may rejoin.")
+                    await self.bot.send_message(member, timeout_message)
                     await self.bot.kick(member)
+                    await self.writelog(server, "{0.name} has timed out".format(member))
             else:
                 channel_name = "Welcome_" + member.id
                 everyone_perms = discord.PermissionOverwrite(
                     read_messages=False)
                 user_perms = discord.PermissionOverwrite(
                     read_messages=True, add_reactions=False, read_message_history=True)
+                bot_perms = discord.PermissionOverwrite(read_messages=True, add_reaction=True, manage_channels=True)
                 everyone = discord.ChannelPermissions(
                     target=server.default_role, overwrite=everyone_perms)
                 user = discord.ChannelPermissions(
                     target=member, overwrite=user_perms)
-                channel = await self.bot.create_channel(server, channel_name, everyone, user)
+                bot = discord.ChannelPermissions(target=server.me, overwrite=bot_perms)
+                channel = await self.bot.create_channel(server, channel_name, everyone, user, bot)
                 result = await self.bounce(channel, rules.format(member, server), member)
                 if result:
                     await self.bot.send_message(channel, welcome_message)
                     if role_before:
                         await self.bot.remove_roles(member, role_before)
                     await self.bot.add_roles(member, role_after)
+                    await self.writelog(server, "{0.name} has accepted the rules".format(member))
                     await asyncio.sleep(180)
                     await self.bot.delete_channel(channel)
                 if not result and result is not None:
                     await self.bot.delete_channel(channel)
                     await self.bot.send_message(member, kick_message)
                     await self.bot.kick(member)
+                    await self.writelog(server, "{0.name} has denied the rules and been kicked".format(member))
                 elif result is None:
                     await self.bot.delete_channel(channel)
-                    await self.bot.send_message(member, "You took too long to respond. You may rejoin.")
+                    await self.bot.send_message(member, timeout_message)
                     await self.bot.kick(member)
+                    await self.writelog(server, "{0.name} has timed out".format(member))
         except discord.errors.Forbidden:
             print("Missing neccesary permisions. Ugh..")
+            await self.writelog(server, "Missing some permission, member might be stuck")
         except Exception as e:
-            print("Something happened. Error: {}".format(e))
+            print("[Bouncer]. Please contact the author. Something happened. Error: {}".format(e))
+            await self.writelog(server, "Unknown exception occured: {}. User is probably stuck,".format(e))
 
 
 def check_folders():
