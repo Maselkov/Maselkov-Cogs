@@ -196,9 +196,9 @@ class Lewd:
             personal_filter = "None"
         if not server_filter:
             server_filter = "None"
-        data = "{0}, currently you're filtering the following tags: `{1}`\n{2} is "
+        data = ("{0}, currently you're filtering the following tags: `{1}`\n{2} is "
                "currently filtering the following tags: `{3}`".format(
-               user.mention, personal_filter, server.name, server_filter)
+               user.mention, personal_filter, server.name, server_filter))
         await self.bot.say(data)
 
     @checks.mod_or_permissions(manage_channels=True)
