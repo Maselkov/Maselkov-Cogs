@@ -43,6 +43,9 @@ class Lewd:
         if self.settings[server.id][channel.id] == "off":
             await self.bot.say("Porn is disabled in this channel.")
             return
+        if self.settings[server.id][channel.id] == "sfw" and self.contains_nsfw(tags):
+            await self.bot.say("Nice try")
+            return
         msg = await self.bot.say("Acquiring result...")
         if tags:
             search = " ".join(tags)
@@ -55,7 +58,7 @@ class Lewd:
             async with self.session.get(url) as r:
                 results = await r.json()
             results = [res for res in results if not any(
-                x in res["tags"] for x in filters)]
+                x in res["tags"] for x in filters) and not res["file_url"].endswith((".mp4", ".swf", ".webm"))]
             random_post = choice(results)
             embed = self.e621_embed(random_post, search)
             await self.bot.edit_message(msg, new_content="{0.mention}:".format(user), embed=embed)
@@ -81,6 +84,9 @@ class Lewd:
         if self.settings[server.id][channel.id] == "off":
             await self.bot.say("Porn is disabled in this channel.")
             return
+        if self.settings[server.id][channel.id] == "sfw" and self.contains_nsfw(tags):
+            await self.bot.say("Nice try")
+            return
         if tags:
             search = " ".join(tags)
         else:
@@ -93,7 +99,7 @@ class Lewd:
             async with self.session.get(url) as r:
                 tree = ET.fromstring(await r.read())
             results = [{"url": "https:" + str(post.get("file_url")), "source": str(post.get("source"))} for post in tree.iter(
-                "post") if not any(x in post.get("tags") for x in filters)]
+                "post") if not any(x in post.get("tags") for x in filters) and not str(post.get("file_url")).endswith((".mp4", ".webm", ".swf"))]
             post = choice(results)
             embed = self.r34_embed(post, search)
             await self.bot.edit_message(msg, new_content="{0.mention}:".format(user), embed=embed)
@@ -116,7 +122,7 @@ class Lewd:
     async def lewdset_channel(self, ctx, mode: str):
         """Sets channel mode.
 
-        Off - disabled e621
+        Off - disables NSFW commands
         SFW - Forces rating:s on all searches
         NSFW - Allows everything"""
         server = ctx.message.server
@@ -257,11 +263,12 @@ class Lewd:
 
     def e621_embed(self, post, search):
         url = post["file_url"]
+        submission = "https://e621.net/post/show/" + str(post["id"])
         source = post["source"]
         if not source:
-            description = None
+            description = "[e621 post]({0})".format(submission)
         else:
-            description = "[Source]({0})".format(source)
+            description = "[e621 post]({0}) ⋅ [original source]({1})".format(submission, source)
         color = 0x152f56
         data = discord.Embed(title="e621 search results", colour=color,
                              description=description)
@@ -320,7 +327,7 @@ class Lewd:
         del filters[:filters_allowed]
         search = "%20".join(tags)
         filters = [f.lstrip("-") for f in filters]
-        return [url + search, filters]
+        return url + search, filters
 
     def check_settings(self, ctx):
         user = ctx.message.author
@@ -339,6 +346,13 @@ class Lewd:
             self.settings[server.id][channel.id] = "sfw"
             dataIO.save_json("data/lewd/settings.json", self.settings)
         return
+
+    def contains_nsfw(self, tags):
+        nsfw = ["rating:e", "rating:explicit", "rating:q", "rating:questionable"]
+        if any(x in [tag.lower() for tag in tags] for x in nsfw):
+            return True
+        else:
+            return False
 
 
 def check_folders():
