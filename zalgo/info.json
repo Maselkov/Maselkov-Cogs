@@ -1,0 +1,9 @@
+{
+    "AUTHOR" : "Maselkov",
+    "SHORT" : "Zalgo your text!",
+    "DESCRIPTION" : "Zalgo your text! Is that a verb?",
+    "DISABLED" : false,
+    "NAME" : "Zalgo",
+    "TAGS" : ["Zalgo", "Creepy"],
+    "INSTALL_MSG" : "Set settings using `[p]zalgoset`. Settings are tied to user account, cross server"
+}

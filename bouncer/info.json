@@ -1,0 +1,9 @@
+{
+    "AUTHOR" : "Maselkov",
+    "SHORT" : "Bouncer for your server",
+    "DESCRIPTION" : "Greets users with rules, they can either accept or get kicked.",
+    "DISABLED" : false,
+    "NAME" : "Bouncer",
+    "TAGS" : ["Utility", "Moderation", "Bouncer"],
+    "INSTALL_MSG" : "See `[p]bouncerset"
+}
