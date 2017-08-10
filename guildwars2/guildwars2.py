@@ -1348,8 +1348,8 @@ class GuildWars2:
                     + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
         try:
             await self.bot.say(embed=data)
-        except discord.HTTPException:
-            await self.bot.say("Need permission to embed links")
+        except discord.HTTPException as e:
+            await self.bot.say("Need permission to embed links " + e)
 
 
     async def _gamebuild_checker(self):
