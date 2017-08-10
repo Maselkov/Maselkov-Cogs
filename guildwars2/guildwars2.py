@@ -1325,7 +1325,9 @@ class GuildWars2:
             if item_id is not "":
                 itemlist = await self.call_api(endpoint_items)
                 listings = await self.call_api(endpoint_listing)
+                await self.bot.say("Test! id besetzt")
             else:
+                await self.bot.say("Test! id nicht besetzt")
                 data.add_field(name="No current transactions", value=" ", inline=False)
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
