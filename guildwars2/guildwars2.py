@@ -1284,7 +1284,6 @@ class GuildWars2:
         user = ctx.message.author
         color = self.getColor(user)
         state = buys_sells.lower()
-        transaction=True
         scopes = ["tradingpost"]
         if state == "buys" or state == "sells":
             try:
@@ -1327,13 +1326,11 @@ class GuildWars2:
                 itemlist = await self.call_api(endpoint_items)
                 listings = await self.call_api(endpoint_listing)
             else:
-                transaction=False
                 data.add_field(name="No current transactions", value="Have fun", inline=False)
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        #if transaction is True:
         for result in results:
             # Store data about transaction
             index = dup_item[result["item_id"]]
