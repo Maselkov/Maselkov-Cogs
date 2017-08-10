@@ -1322,7 +1322,7 @@ class GuildWars2:
         endpoint_listing = "commerce/listings?ids={0}".format(str(item_id))
         # Call API once for all items
         try:
-            if item_id is not None:
+            if item_id is not "":
                 itemlist = await self.call_api(endpoint_items)
                 listings = await self.call_api(endpoint_listing)
             else:
