@@ -1330,7 +1330,7 @@ class GuildWars2:
             else:
                 await self.bot.say("Test! id nicht besetzt")
                 transaction=False
-                data.add_field(name="No current transactions", value=" ", inline=False)
+                data.add_field(name="No current transactions", value="Have fun", inline=False)
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
