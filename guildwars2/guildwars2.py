@@ -1313,31 +1313,34 @@ class GuildWars2:
         item_id = ""
         dup_item = {}
         # Collect listed items
-        for result in results:
-            item_id += str(result["item_id"]) + ","
-            if result["item_id"] not in dup_item:
-                dup_item[result["item_id"]] = len(dup_item)
-        # Get information about all items, doesn't matter if string ends with ,
-        endpoint_items = "items?ids={0}".format(str(item_id))
-        endpoint_listing = "commerce/listings?ids={0}".format(str(item_id))
-        # Call API once for all items
-        try:
-            itemlist = await self.call_api(endpoint_items)
-            listings = await self.call_api(endpoint_listing)
-        except APIError as e:
-            await self.bot.say("{0.mention}, API has responded with the following error: "
-                               "`{1}`".format(user, e))
-            return
-        for result in results:
-            # Store data about transaction
-            index = dup_item[result["item_id"]]
-            quantity = result["quantity"]
-            price = result["price"]
-            item_name = itemlist[index]["name"]
-            offers = listings[index][state]
-            max_price = offers[0]["unit_price"]
-            data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price)
-                + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
+        if results is not None:
+            for result in results:
+                item_id += str(result["item_id"]) + ","
+                if result["item_id"] not in dup_item:
+                    dup_item[result["item_id"]] = len(dup_item)
+            # Get information about all items, doesn't matter if string ends with ,
+            endpoint_items = "items?ids={0}".format(str(item_id))
+            endpoint_listing = "commerce/listings?ids={0}".format(str(item_id))
+            # Call API once for all items
+            try:
+                itemlist = await self.call_api(endpoint_items)
+                listings = await self.call_api(endpoint_listing)
+            except APIError as e:
+                await self.bot.say("{0.mention}, API has responded with the following error: "
+                                   "`{1}`".format(user, e))
+                return
+            for result in results:
+                # Store data about transaction
+                index = dup_item[result["item_id"]]
+                quantity = result["quantity"]
+                price = result["price"]
+                item_name = itemlist[index]["name"]
+                offers = listings[index][state]
+                max_price = offers[0]["unit_price"]
+                data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price)
+                    + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
+        else:
+            data.add_field(name="Currently no transactions!", value=" ", inline=False)
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException:
