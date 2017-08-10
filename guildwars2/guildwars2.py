@@ -1349,7 +1349,7 @@ class GuildWars2:
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException as e:
-            await self.bot.say("Need permission to embed links " + e)
+            await self.bot.say("Need permission to embed links " + str(e))
 
 
     async def _gamebuild_checker(self):
