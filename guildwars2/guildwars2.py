@@ -1322,8 +1322,11 @@ class GuildWars2:
         endpoint_listing = "commerce/listings?ids={0}".format(str(item_id))
         # Call API once for all items
         try:
-            itemlist = await self.call_api(endpoint_items)
-            listings = await self.call_api(endpoint_listing)
+            if item_id is not "":
+                itemlist = await self.call_api(endpoint_items)
+                listings = await self.call_api(endpoint_listing)
+            else:
+                data.add_field(name="No current transactions", value="Have fun", inline=False)
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
@@ -1340,8 +1343,8 @@ class GuildWars2:
                 + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
         try:
             await self.bot.say(embed=data)
-        except discord.HTTPException:
-            await self.bot.say("Need permission to embed links")
+        except discord.HTTPException as e:
+            await self.bot.say("Need permission to embed links " + str(e))
 
 
     async def _gamebuild_checker(self):
