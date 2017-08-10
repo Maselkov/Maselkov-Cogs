@@ -1326,26 +1326,24 @@ class GuildWars2:
             if item_id is not "":
                 itemlist = await self.call_api(endpoint_items)
                 listings = await self.call_api(endpoint_listing)
-                await self.bot.say("Test! id besetzt")
             else:
-                await self.bot.say("Test! id nicht besetzt")
                 transaction=False
                 data.add_field(name="No current transactions", value="Have fun", inline=False)
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
                                "`{1}`".format(user, e))
             return
-        if transaction is True:
-            for result in results:
-                # Store data about transaction
-                index = dup_item[result["item_id"]]
-                quantity = result["quantity"]
-                price = result["price"]
-                item_name = itemlist[index]["name"]
-                offers = listings[index][state]
-                max_price = offers[0]["unit_price"]
-                data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price)
-                    + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
+        #if transaction is True:
+        for result in results:
+            # Store data about transaction
+            index = dup_item[result["item_id"]]
+            quantity = result["quantity"]
+            price = result["price"]
+            item_name = itemlist[index]["name"]
+            offers = listings[index][state]
+            max_price = offers[0]["unit_price"]
+            data.add_field(name=item_name, value=str(quantity) + " x " + self.gold_to_coins(price)
+                + " | Max. offer: " + self.gold_to_coins(max_price), inline=False)
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException as e:
