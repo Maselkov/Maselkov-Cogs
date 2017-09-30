@@ -1173,7 +1173,7 @@ class GuildWars2:
     async def daily(self, ctx, pve_pvp_wvw_fractals):
         valid_dailies = ["pvp", "wvw", "pve", "fractals"]
         user = ctx.message.author
-		language = self.getlanguage(ctx)
+	language = self.getlanguage(ctx)
         search = pve_pvp_wvw_fractals.lower()
         try:
             endpoint = "achievements/daily"
