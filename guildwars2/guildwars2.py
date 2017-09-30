@@ -1173,6 +1173,7 @@ class GuildWars2:
     async def daily(self, ctx, pve_pvp_wvw_fractals):
         valid_dailies = ["pvp", "wvw", "pve", "fractals"]
         user = ctx.message.author
+		language = self.getlanguage(ctx)
         search = pve_pvp_wvw_fractals.lower()
         try:
             endpoint = "achievements/daily"
@@ -1193,7 +1194,7 @@ class GuildWars2:
                 dailies.append(str(x["id"]))
         dailies = ",".join(dailies)
         try:
-            endpoint = "achievements?ids={0}".format(dailies)
+            endpoint = "achievements?ids={0}&lang={1}".format(dailies,language)
             results = await self.call_api(endpoint)
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
