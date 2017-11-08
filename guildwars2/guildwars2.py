@@ -1357,6 +1357,7 @@ class GuildWars2:
         scopes = ["tradingpost"]
         language = self.getlanguage(ctx)
         item_id = ""
+        counter = 0
 
         try:
             self._check_scopes_(user, scopes)
@@ -1378,6 +1379,7 @@ class GuildWars2:
         coins = results["coins"]
         items = results["items"]
         items = items[:20] # Get only first 20 entries
+        item_quantity = []
 
         if coins is 0:
             gold = "No monnies for you"
@@ -1387,6 +1389,7 @@ class GuildWars2:
 
         for item in items:
             item_id += str(item["id"]) + ","
+            item_quantity.append(str(item["count"]))
         endpoint_items = "items?ids={0}&lang={1}".format(str(item_id),language)
 
         #Call API Once for all items
@@ -1402,14 +1405,9 @@ class GuildWars2:
 
         for item in itemlist:
             item_name=item["name"]
-            item_id=item["id"]
-            quantity="0"
-
-            for it in items:
-                if str(it["id"]) is str(item_id):
-                    quantity = str(it["id"]) + " " + str(item_id)
-
-            data.add_field(name=item_name, value=quantity, inline=False)
+            quantity=item_quantity[counter]
+            counter += 1
+            data.add_field(name=item_name, value=str(quantity), inline=False)
 
         try:
             await self.bot.say(embed=data)
