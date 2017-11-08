@@ -1387,32 +1387,36 @@ class GuildWars2:
             gold = self.gold_to_coins(coins)
         data.add_field(name="Coins", value=gold, inline=False)
 
-        for item in items:
-            item_id += str(item["id"]) + ","
-            item_quantity.append(str(item["count"]))
-        endpoint_items = "items?ids={0}&lang={1}".format(str(item_id),language)
+        if len(items) != 0:
+            for item in items:
+                item_id += str(item["id"]) + ","
+                item_quantity.append(str(item["count"]))
+            endpoint_items = "items?ids={0}&lang={1}".format(str(item_id),language)
 
-        #Call API Once for all items
-        try:
-            if item_id is not "":
-                itemlist = await self.call_api(endpoint_items)
-            else:
-                data.add_field(name="No current deliveries.", value="Have fun!", inline=False)
-        except APIError as e:
-            await self.bot.say("{0.mention}, API has responded with the following error: "
-                               "`{1}`".format(user, e))
-            return
+            #Call API Once for all items
+            try:
+                if item_id is not "":
+                    itemlist = await self.call_api(endpoint_items)
+                else:
+                    data.add_field(name="No current deliveries.", value="Have fun!", inline=False)
+            except APIError as e:
+                await self.bot.say("{0.mention}, API has responded with the following error: "
+                                   "`{1}`".format(user, e))
+                return
 
-        for item in itemlist:
-            item_name=item["name"]
-            quantity=item_quantity[counter]
-            counter += 1
-            data.add_field(name=item_name, value=str(quantity) + 'x', inline=False)
-
+            for item in itemlist:
+                item_name=item["name"]
+                quantity=item_quantity[counter]
+                counter += 1
+                data.add_field(name=item_name, value=str(quantity) + 'x', inline=False)
+        else:
+            data.add_field(name="No current deliveries.", value="Have fun!", inline=False)
+            
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException as e:
             await self.bot.say("Need permission to embed links " + str(e))
+
 
     async def _gamebuild_checker(self):
         while self is self.bot.get_cog("GuildWars2"):
