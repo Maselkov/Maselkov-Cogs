@@ -1374,7 +1374,11 @@ class GuildWars2:
         data.set_footer(text="Black Lion Trading Company")
 
         coins = results["coins"]
-        data.add_field(name="Coins", value=self.gold_to_coins(coins), inline=False)
+        if coins is 0:
+            gold = "No monnies for you"
+        else:
+            gold = self.gold_to_coins(coins)
+        data.add_field(name="Coins", value=gold, inline=False)
 
         try:
             await self.bot.say(embed=data)
