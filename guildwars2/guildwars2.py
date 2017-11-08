@@ -1357,6 +1357,7 @@ class GuildWars2:
         scopes = ["tradingpost"]
 
         try:
+            self._check_scopes_(user, scopes)
             key = self.keylist[user.id]["key"]
             accountname = self.keylist[user.id]["account_name"]
             endpoint = "commerce/delivery?access_token={0}".format(key)
@@ -1374,7 +1375,8 @@ class GuildWars2:
 
         for result in results:
             coins = result["coins"]
-            data.add_field(name="Coins", value=self.gold_to_coins(coins), inline=False)
+            #data.add_field(name="Coins", value=self.gold_to_coins(coins), inline=False)
+            data.add_field(name="Coins", value="test", inline=False)
 
         try:
             await self.bot.say(embed=data)
