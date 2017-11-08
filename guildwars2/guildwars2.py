@@ -1355,6 +1355,7 @@ class GuildWars2:
         user = ctx.message.author
         color = self.getColor(user)
         scopes = ["tradingpost"]
+        item_id = ""
 
         try:
             self._check_scopes_(user, scopes)
@@ -1374,11 +1375,18 @@ class GuildWars2:
         data.set_footer(text="Black Lion Trading Company")
 
         coins = results["coins"]
+        items = results["items"]
         if coins is 0:
             gold = "No monnies for you"
         else:
             gold = self.gold_to_coins(coins)
         data.add_field(name="Coins", value=gold, inline=False)
+
+        for item in items:
+            item_id += str(item["item_id"]) + ","
+        endpoint_items = "items?ids={0}".format(str(item_id))
+        data.add_field(name="Itemids", value=item_id, inline=False)
+
 
         try:
             await self.bot.say(embed=data)
