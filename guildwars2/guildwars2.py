@@ -1376,6 +1376,8 @@ class GuildWars2:
 
         coins = results["coins"]
         items = results["items"]
+        items = items[:20] # Get only first 20 entries
+
         if coins is 0:
             gold = "No monnies for you"
         else:
@@ -1385,7 +1387,21 @@ class GuildWars2:
         for item in items:
             item_id += str(item["id"]) + ","
         endpoint_items = "items?ids={0}".format(str(item_id))
-        data.add_field(name="Itemids", value=item_id, inline=False)
+        #Call API Once for all items
+        try:
+            if item_id is not "":
+                itemlist = await self.call_api(endpoint_items)
+            else:
+                data.add_field(name="No current deliveries.", value="Have fun!", inline=False)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        for item in itemlist:
+            item_name=item["name"]
+
+            data.add_field(name=item_name, value="test", inline=False)
 
 
         try:
