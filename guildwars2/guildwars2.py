@@ -1403,6 +1403,7 @@ class GuildWars2:
         for item in itemlist:
             item_name=item["name"]
             item_id=item["id"]
+            quantity="0"
 
             for it in items:
                 if item_id is it["id"]:
