@@ -1400,8 +1400,8 @@ class GuildWars2:
 
         for item in itemlist:
             item_name=item["name"]
-
-            data.add_field(name=item_name, value="test", inline=False)
+            item_id=item["flags"]["id"]
+            data.add_field(name=item_name, value=item_id, inline=False)
 
 
         try:
