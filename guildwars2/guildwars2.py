@@ -1376,7 +1376,7 @@ class GuildWars2:
         coins = results
         #for result in results:
         #    coins = result[0]
-        data.add_field(name="Coins", value=self.gold_to_coins(coins), inline=False)
+        data.add_field(name="Coins", value=str(type(results)), inline=False)
 
         try:
             await self.bot.say(embed=data)
