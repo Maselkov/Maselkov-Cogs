@@ -1373,9 +1373,10 @@ class GuildWars2:
             url="https://wiki.guildwars2.com/images/thumb/d/df/Black-Lion-Logo.png/300px-Black-Lion-Logo.png")
         data.set_footer(text="Black Lion Trading Company")
 
-        for result in results:
-            coins = result[0]
-            data.add_field(name="Coins", value=self.gold_to_coins(coins), inline=False)
+        coins = results
+        #for result in results:
+        #    coins = result[0]
+        data.add_field(name="Coins", value=self.gold_to_coins(coins), inline=False)
 
         try:
             await self.bot.say(embed=data)
