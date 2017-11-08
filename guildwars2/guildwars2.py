@@ -1355,6 +1355,7 @@ class GuildWars2:
         user = ctx.message.author
         color = self.getColor(user)
         scopes = ["tradingpost"]
+        language = self.getlanguage(ctx)
         item_id = ""
 
         try:
@@ -1386,7 +1387,8 @@ class GuildWars2:
 
         for item in items:
             item_id += str(item["id"]) + ","
-        endpoint_items = "items?ids={0}".format(str(item_id))
+        endpoint_items = "items?ids={0}&lang={1}".format(str(item_id),language)
+
         #Call API Once for all items
         try:
             if item_id is not "":
@@ -1400,7 +1402,7 @@ class GuildWars2:
 
         for item in itemlist:
             item_name=item["name"]
-            item_id=item["flags"]["id"]
+            item_id=item["flags"][0]
             data.add_field(name=item_name, value=item_id, inline=False)
 
 
