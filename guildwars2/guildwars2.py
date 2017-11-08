@@ -1402,7 +1402,7 @@ class GuildWars2:
 
         for item in itemlist:
             item_name=item["name"]
-            item_id=item["flags"][0]
+            item_id=item["id"]
             data.add_field(name=item_name, value=item_id, inline=False)
 
 
