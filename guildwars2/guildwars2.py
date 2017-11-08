@@ -1383,7 +1383,7 @@ class GuildWars2:
         data.add_field(name="Coins", value=gold, inline=False)
 
         for item in items:
-            item_id += str(item["item_id"]) + ","
+            item_id += str(item["id"]) + ","
         endpoint_items = "items?ids={0}".format(str(item_id))
         data.add_field(name="Itemids", value=item_id, inline=False)
 
