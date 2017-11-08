@@ -1407,7 +1407,7 @@ class GuildWars2:
             item_name=item["name"]
             quantity=item_quantity[counter]
             counter += 1
-            data.add_field(name=item_name, value=str(quantity), inline=False)
+            data.add_field(name=item_name, value=str(quantity) + 'x', inline=False)
 
         try:
             await self.bot.say(embed=data)
