@@ -1406,8 +1406,8 @@ class GuildWars2:
             quantity="0"
 
             for it in items:
-                if item_id is it["id"]:
-                    quantity = it["count"]
+                if item_id is str(it["id"]):
+                    quantity = str(it["count"])
 
             data.add_field(name=item_name, value=quantity, inline=False)
 
