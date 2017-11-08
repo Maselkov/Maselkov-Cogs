@@ -1346,6 +1346,38 @@ class GuildWars2:
         except discord.HTTPException as e:
             await self.bot.say("Need permission to embed links " + str(e))
 
+    @tp.command(pass_context=True)
+    async def delivery(self, ctx):
+        """Show current selling/buying transactions
+            invoke with sells or buys"""
+        user = ctx.message.author
+        color = self.getColor(user)
+        scopes = ["tradingpost"]
+
+        try:
+            key = self.keylist[user.id]["key"]
+            accountname = self.keylist[user.id]["account_name"]
+            endpoint = "commerce/delivery?access_token={0}".format(key)
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        data = discord.Embed(description='Current deliveries' , colour=color)
+        data.set_author(name='Delivery overview of {0}'.format(accountname))
+        data.set_thumbnail(
+            url="https://wiki.guildwars2.com/images/thumb/d/df/Black-Lion-Logo.png/300px-Black-Lion-Logo.png")
+        data.set_footer(text="Black Lion Trading Company")
+
+        for result in results:
+            coins = result["coins"]
+            data.add_field(name="Coins", value=self.gold_to_coins(coins), inline=False)
+
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException as e:
+            await self.bot.say("Need permission to embed links " + str(e))
 
     async def _gamebuild_checker(self):
         while self is self.bot.get_cog("GuildWars2"):
