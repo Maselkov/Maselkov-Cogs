@@ -1403,8 +1403,12 @@ class GuildWars2:
         for item in itemlist:
             item_name=item["name"]
             item_id=item["id"]
-            data.add_field(name=item_name, value=item_id, inline=False)
 
+            for it in items:
+                if item_id is it["id"]:
+                    quantity = it["count"]
+
+            data.add_field(name=item_name, value=quantity, inline=False)
 
         try:
             await self.bot.say(embed=data)
