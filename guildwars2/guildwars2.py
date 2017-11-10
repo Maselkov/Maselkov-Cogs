@@ -1418,6 +1418,7 @@ class GuildWars2:
             await self.bot.say("Need permission to embed links ")
 
 
+
     async def _gamebuild_checker(self):
         while self is self.bot.get_cog("GuildWars2"):
             if self.settings["ENABLED"]:
