@@ -4,6 +4,7 @@ from .utils import checks
 from cogs.utils.dataIO import dataIO, fileIO
 from __main__ import send_cmd_help
 
+#test
 
 import json
 import os
@@ -1172,6 +1173,7 @@ class GuildWars2:
     async def daily(self, ctx, pve_pvp_wvw_fractals):
         valid_dailies = ["pvp", "wvw", "pve", "fractals"]
         user = ctx.message.author
+        language = self.getlanguage(ctx)
         search = pve_pvp_wvw_fractals.lower()
         try:
             endpoint = "achievements/daily"
@@ -1192,7 +1194,7 @@ class GuildWars2:
                 dailies.append(str(x["id"]))
         dailies = ",".join(dailies)
         try:
-            endpoint = "achievements?ids={0}".format(dailies)
+            endpoint = "achievements?ids={0}&lang={1}".format(dailies,language)
             results = await self.call_api(endpoint)
         except APIError as e:
             await self.bot.say("{0.mention}, API has responded with the following error: "
@@ -1345,6 +1347,76 @@ class GuildWars2:
             await self.bot.say(embed=data)
         except discord.HTTPException as e:
             await self.bot.say("Need permission to embed links " + str(e))
+
+    @tp.command(pass_context=True)
+    async def delivery(self, ctx):
+        """Show current selling/buying transactions
+            invoke with sells or buys"""
+        user = ctx.message.author
+        color = self.getColor(user)
+        scopes = ["tradingpost"]
+        language = self.getlanguage(ctx)
+        item_id = ""
+        counter = 0
+
+        try:
+            self._check_scopes_(user, scopes)
+            key = self.keylist[user.id]["key"]
+            accountname = self.keylist[user.id]["account_name"]
+            endpoint = "commerce/delivery?access_token={0}".format(key)
+            results = await self.call_api(endpoint)
+        except APIError as e:
+            await self.bot.say("{0.mention}, API has responded with the following error: "
+                               "`{1}`".format(user, e))
+            return
+
+        data = discord.Embed(description='Current deliveries' , colour=color)
+        data.set_author(name='Delivery overview of {0}'.format(accountname))
+        data.set_thumbnail(
+            url="https://wiki.guildwars2.com/images/thumb/d/df/Black-Lion-Logo.png/300px-Black-Lion-Logo.png")
+        data.set_footer(text="Black Lion Trading Company")
+
+        coins = results["coins"]
+        items = results["items"]
+        items = items[:20] # Get only first 20 entries
+        item_quantity = []
+
+        if coins is 0:
+            gold = "No monnies for you"
+        else:
+            gold = self.gold_to_coins(coins)
+        data.add_field(name="Coins", value=gold, inline=False)
+
+        if len(items) != 0:
+            for item in items:
+                item_id += str(item["id"]) + ","
+                item_quantity.append(str(item["count"]))
+            endpoint_items = "items?ids={0}&lang={1}".format(str(item_id),language)
+
+            #Call API Once for all items
+            try:
+                if item_id is not "":
+                    itemlist = await self.call_api(endpoint_items)
+                else:
+                    data.add_field(name="No current deliveries.", value="Have fun!", inline=False)
+            except APIError as e:
+                await self.bot.say("{0.mention}, API has responded with the following error: "
+                                   "`{1}`".format(user, e))
+                return
+
+            for item in itemlist:
+                item_name=item["name"]
+                quantity=item_quantity[counter]
+                counter += 1
+                data.add_field(name=item_name, value='x{0}'.format(quantity), inline=False)
+        else:
+            data.add_field(name="No current deliveries.", value="Have fun!", inline=False)
+
+        try:
+            await self.bot.say(embed=data)
+        except discord.HTTPException as e:
+            await self.bot.say("Need permission to embed links ")
+
 
 
     async def _gamebuild_checker(self):
