@@ -1408,14 +1408,14 @@ class GuildWars2:
                 item_name=item["name"]
                 quantity=item_quantity[counter]
                 counter += 1
-                data.add_field(name=item_name, value=str(quantity) + 'x', inline=False)
+                data.add_field(name=item_name, value='x{0}'.format(quantity), inline=False)
         else:
             data.add_field(name="No current deliveries.", value="Have fun!", inline=False)
-            
+
         try:
             await self.bot.say(embed=data)
         except discord.HTTPException as e:
-            await self.bot.say("Need permission to embed links " + str(e))
+            await self.bot.say("Need permission to embed links ")
 
 
     async def _gamebuild_checker(self):
