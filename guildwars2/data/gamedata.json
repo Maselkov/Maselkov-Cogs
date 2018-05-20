@@ -61,6 +61,10 @@
     "cairn" :  { "name" : "Cairn the Indomitable", "order" : 11 },
     "mursaat_overseer" :  { "name" : "Mursaat Overseer", "order" : 12 },
     "samarog" :  { "name" : "Samarog", "order" : 13 },
-    "deimos" :  { "name" : "Deimos", "order" : 14 }
+    "deimos" :  { "name" : "Deimos", "order" : 14 },
+	"soulless_horror" : { "name" : "Soulless Horror", "order" : 15 },
+	"river_of_souls" : { "name" : "River of Souls", "order" : 16},
+	"statues_of_grenth" : { "name" : "Statues of Grenth", "order" : 17},
+	"voices_in_the_void" : { "name" : "Voices in the Void", "order" : 18}
   }
 }
