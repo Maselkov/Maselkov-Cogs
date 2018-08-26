@@ -55,7 +55,8 @@ class Lewd:
             constructed = self.construct_url("e621", ctx, tags)
             url = constructed[0]
             filters = constructed[1]
-            async with self.session.get(url) as r:
+            headers = {'User-Agent': 'API Discord Bot'}
+            async with self.session.get(url, headers=headers) as r:
                 results = await r.json()
             results = [res for res in results if not any(
                 x in res["tags"] for x in filters) and not res["file_url"].endswith((".mp4", ".swf", ".webm"))]
@@ -98,8 +99,14 @@ class Lewd:
             filters = constructed[1]
             async with self.session.get(url) as r:
                 tree = ET.fromstring(await r.read())
-            results = [{"url": "https:" + str(post.get("file_url")), "source": str(post.get("source"))} for post in tree.iter(
-                "post") if not any(x in post.get("tags") for x in filters) and not str(post.get("file_url")).endswith((".mp4", ".webm", ".swf"))]
+            results = [
+            {
+                    "url": str(post.attrib.get('file_url')),
+                    "source": str(post.attrib.get('source'))
+            } for post in tree.iter("post")
+            if not any(x in post.attrib.get('tags') for x in filters) and not str(
+                post.attrib.get("file_url")).endswith((".mp4", ".webm", ".swf"))
+            ]
             post = choice(results)
             embed = self.r34_embed(post, search)
             await self.bot.edit_message(msg, new_content="{0.mention}:".format(user), embed=embed)
